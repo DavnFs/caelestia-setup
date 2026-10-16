@@ -15,8 +15,10 @@ ConnectedRect {
     property alias label: label.text
     property alias valueLabel: valueLabel.text
     property real value
+    property bool iconClickable
 
     signal moved(value: real)
+    signal iconClicked
 
     Layout.fillWidth: true
     implicitHeight: rowLayout.implicitHeight + rowLayout.anchors.margins + rowLayout.anchors.topMargin
@@ -34,6 +36,14 @@ ConnectedRect {
 
             color: Colours.palette.m3onSurfaceVariant
             fontStyle: Tokens.font.icon.medium
+
+            MouseArea {
+                anchors.fill: parent
+                anchors.margins: -Tokens.padding.small
+                enabled: root.iconClickable
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.iconClicked()
+            }
         }
 
         ColumnLayout {

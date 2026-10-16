@@ -80,7 +80,18 @@ PageBase {
 
             icon: "tune"
             text: Tr.tr("App volumes")
-            subtext: Audio.streams.length === 0 ? Tr.tr("No apps playing audio") : Tr.trN("%n app playing audio", "%n apps playing audio", Audio.streams.length)
+            subtext: {
+                const playing = Audio.playbackStreams.length;
+                const recording = Audio.recordingStreams.length;
+                if (playing + recording === 0)
+                    return Tr.tr("No apps using audio");
+                const parts = [];
+                if (playing > 0)
+                    parts.push(Tr.trN("%n app playing", "%n apps playing", playing));
+                if (recording > 0)
+                    parts.push(Tr.trN("%n app recording", "%n apps recording", recording));
+                return parts.join(" · ");
+            }
             onClicked: root.nState.openSubPage(1)
         }
     }

@@ -24,13 +24,13 @@ GridLayout {
     readonly property var enabledEntries: Config.bar.entries.values.filter(e => e.enabled)
     readonly property int firstSpacerIndex: enabledEntries.findIndex(e => e.id === "spacer")
 
-    // Width of the first spacer that puts the centre of the active window on the centre of the bar
+    // Width of the first spacer that puts the centre of the entry after it on the centre of the bar
     readonly property real centringSpacerWidth: {
         if (!isHorizontal || firstSpacerIndex < 0)
             return 0;
         let before = axisPadding;
         let fixed = axisPadding * 2 + columnSpacing * Math.max(0, entryCount - 1);
-        let title = -1;
+        let centred = -1;
         for (let i = 0; i < entryCount; i++) {
             const entry = repeater.itemAt(i) as EntryWrapper;
             if (!entry)
@@ -38,12 +38,12 @@ GridLayout {
             fixed += entry.implicitWidth;
             if (i < firstSpacerIndex)
                 before += entry.implicitWidth + columnSpacing;
-            else if (title < 0 && entry.entryId === "activeWindow")
-                title = entry.implicitWidth;
+            else if (centred < 0 && i > firstSpacerIndex)
+                centred = entry.implicitWidth;
         }
-        if (title < 0)
+        if (centred < 0)
             return 0;
-        const wanted = width / 2 - title / 2 - columnSpacing - before;
+        const wanted = width / 2 - centred / 2 - columnSpacing - before;
         return Math.max(0, Math.min(wanted, width - fixed));
     }
 

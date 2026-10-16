@@ -53,7 +53,8 @@ Item {
 
     readonly property real itemSize: Tokens.sizes.bar.innerWidth - Tokens.padding.small
     readonly property real windowIconSize: itemSize * 2 / 3
-    readonly property real horizontalWindowsWidth: shownWindowCount * windowIconSize
+    // Trailing pad keeps the last icon clear of the active pill's rounded end.
+    readonly property real horizontalWindowsWidth: shownWindowCount > 0 ? shownWindowCount * windowIconSize + (itemSize - windowIconSize) / 2 : 0
     readonly property bool adding: isHorizontal ? AnimatedRepeater.adding : LazyListView.adding
     readonly property bool removing: isHorizontal ? AnimatedRepeater.removing : LazyListView.removing
     // Row publishes its destination before animating x; initial/add positions are immediate.
@@ -210,6 +211,8 @@ Item {
 
             width: root.isHorizontal ? (AnimatedRepeater.removing ? 0 : root.windowIconSize) : undefined
             height: root.isHorizontal ? root.itemSize : implicitHeight
+            // Icon font doesn't scale with bar size; shrink glyphs to their slot so they don't overlap.
+            fontSizeMode: root.isHorizontal ? Text.HorizontalFit : Text.FixedSize
             grade: 0
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter

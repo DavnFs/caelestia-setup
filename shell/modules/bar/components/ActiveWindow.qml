@@ -102,9 +102,10 @@ Item {
         id: metrics
 
         text: root.windowTitle
-        font: root.Tokens.font.body.builders.small.letterSpacing(1.4).build()
+        font: root.Tokens.font.label.builders.small.letterSpacing(0.4).build()
         elide: Qt.ElideRight
-        elideWidth: Math.max(0, root.maxAlong - root.minimumAlong)
+        // shortcut: quarter-bar cap keeps a left-side title from pushing the centred clock; derive from layout if bar entries change a lot
+        elideWidth: Math.max(0, Math.min(root.maxAlong, root.isHorizontal ? root.bar.width / 4 : Infinity) - root.minimumAlong)
 
         onTextChanged: {
             const next = root.current === text1 ? text2 : text1;

@@ -49,7 +49,8 @@ Item {
             }
         }
 
-        const available = maxWidth - labels - demands.length * Tokens.spacing.extraSmall / 2;
+        // Per workspace with windows: gap after label + trailing pad (see Workspace.horizontalWindowsWidth).
+        const available = maxWidth - labels - demands.length * (Tokens.spacing.extraSmall / 2 + itemSize / 6);
         const slots = Math.max(0, Math.floor(available / (itemSize * 2 / 3)));
         // Preserve a uniform cap: spare width does not favour earlier workspaces.
         let low = 0;

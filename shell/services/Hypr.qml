@@ -14,7 +14,8 @@ Singleton {
     readonly property var toplevels: Hyprland.toplevels
     readonly property var workspaces: Hyprland.workspaces
     readonly property var monitors: Hyprland.monitors
-    readonly property bool usingLua: Hyprland.usingLua
+    // shortcut: noctalia-qs lacks Hyprland.usingLua, so assume the Lua config this system uses; drop the fallback on upstream quickshell
+    readonly property bool usingLua: Hyprland.usingLua ?? true
 
     readonly property HyprlandToplevel activeToplevel: {
         const t = Hyprland.activeToplevel;
@@ -220,6 +221,6 @@ Singleton {
     HyprExtras {
         id: extras
 
-        usingLua: Hyprland.usingLua
+        usingLua: root.usingLua
     }
 }

@@ -146,6 +146,7 @@ StyledRect {
                     delegate: EntryWrapper {
                         BatteryStatus {
                             colour: root.colour
+                            isHorizontal: root.isHorizontal
                         }
                     }
                 }

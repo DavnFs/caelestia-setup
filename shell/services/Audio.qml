@@ -19,6 +19,11 @@ Singleton {
     property list<PwNode> sources: []
     property list<PwNode> streams: []
 
+    // The shell's own capture (visualiser) is hidden
+    readonly property list<PwNode> appStreams: streams.filter(s => s.properties["application.process.id"] != Quickshell.processId)
+    readonly property list<PwNode> playbackStreams: appStreams.filter(s => !isRecording(s))
+    readonly property list<PwNode> recordingStreams: appStreams.filter(s => isRecording(s))
+
     readonly property PwNode sink: Pipewire.defaultAudioSink
     readonly property PwNode source: Pipewire.defaultAudioSource
 
@@ -89,6 +94,27 @@ Singleton {
         if (stream?.ready && stream?.audio) {
             stream.audio.muted = muted;
         }
+    }
+
+    function isRecording(stream: PwNode): bool {
+        return stream?.type === PwNodeType.AudioInStream;
+    }
+
+    // The device on the other end of a stream's links
+    function streamDevice(stream: PwNode): PwNode {
+        for (const group of Pipewire.linkGroups.values) {
+            if (group.source?.id === stream?.id && !group.target?.isStream)
+                return group.target;
+            if (group.target?.id === stream?.id && !group.source?.isStream)
+                return group.source;
+        }
+        return null;
+    }
+
+    // Quickshell can't relink streams; WirePlumber moves a stream when its target.object metadata changes
+    function moveStream(stream: PwNode, device: PwNode): void {
+        if (stream && device?.name)
+            Quickshell.execDetached(["pw-metadata", String(stream.id), "target.object", device.name]);
     }
 
     function getStreamVolume(stream: PwNode): real {
