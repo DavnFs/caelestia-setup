@@ -1,0 +1,8 @@
+{
+    "toggles": {
+        "music": {
+            "spotify": { "enable": false },
+            "sidra": { "enable": true, "match": [{ "class": "sidra" }], "command": ["sidra"], "move": true }
+        }
+    }
+}

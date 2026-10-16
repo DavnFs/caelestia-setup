@@ -13,6 +13,7 @@ Item {
     id: root
 
     required property int centerWidth
+    property int shapeType: MaterialShape.ClamShell
     readonly property color bgColour: Colours.tPalette.m3surfaceContainerHighest
 
     implicitWidth: Math.round(centerWidth * 0.7)
@@ -27,7 +28,7 @@ Item {
         anchors.centerIn: parent
         implicitSize: root.implicitWidth
 
-        shape: MaterialShape.ClamShell
+        shape: root.shapeType
         color: Qt.alpha(root.bgColour, 1)
         opacity: root.bgColour.a
         layer.enabled: true

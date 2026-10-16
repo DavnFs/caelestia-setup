@@ -1,6 +1,6 @@
 # caelestia-setup
 
-My personal setup of the [Caelestia shell](https://github.com/caelestia-dots/shell) for Hyprland: a horizontal top bar, a cleaner workspace widget, a centred clock, battery info, and a better per-app audio page.
+My personal setup of the [Caelestia shell](https://github.com/caelestia-dots/shell) for Hyprland: a horizontal top bar, a cleaner workspace widget, a centred clock, battery info, a better per-app audio page, clickable notifications and a macOS-style lock screen.
 
 `shell/` is based on [caelestia-dots/shell PR #2076](https://github.com/caelestia-dots/shell/pull/2076) ("support all four screen edges") by [@alper-han](https://github.com/alper-han), with my changes on top. All credit for Caelestia goes to its authors. Licensed GPL-3.0 like the original.
 
@@ -25,12 +25,26 @@ My personal setup of the [Caelestia shell](https://github.com/caelestia-dots/she
 - Click an app's icon to mute it.
 - Per-app output/input device picker (moves the stream with `pw-metadata`).
 
+**Notifications**
+- Clicking a notification opens it: runs the app's default action if it's still live, otherwise focuses the app's window, or launches the app. Then closes the panel.
+- New **Notifications** tab in the dashboard (the same list as the sidebar).
+
+**Lock screen (macOS style)**
+- Wallpaper background, date and big clock at the top, battery in the corner.
+- Frosted-glass now-playing widget (artwork, title, artist, progress, controls) while a player has a track loaded.
+- "Enter Password" hint at the bottom; the password field fades in when you start typing and the wallpaper blurs. Fingerprint/face messages still work.
+- Files: `modules/lock/Minimal.qml`, `modules/lock/NowPlaying.qml`, `modules/lock/LockSurface.qml`.
+
+**Hyprland special workspaces**
+- `config/cli.json` swaps Spotify for [Sidra](https://github.com/wimpysworld/sidra) (Apple Music) on the music workspace (Super + M).
+
 ## Files
 
 ```
 shell/                 the patched shell (goes in ~/.config/quickshell/caelestia)
 config/shell.json      bar layout, workspaces, labels  (goes in ~/.config/caelestia/)
 config/shell-tokens.json  bar height                   (goes in ~/.config/caelestia/)
+config/cli.json        special workspace apps (Sidra)  (goes in ~/.config/caelestia/)
 ```
 
 ## Install
@@ -39,7 +53,7 @@ This repo has only the QML. It needs Caelestia's compiled plugins from a build o
 
 1. Build PR #2076 (see the upstream README for build steps) or install `caelestia-shell` and build the PR's plugins.
 2. Edit the first two lines of `shell/shell.qml` so `QML_IMPORT_PATH` and `CAELESTIA_LIB_DIR` point to your build's `qml` and `lib` folders.
-3. Link or copy `shell/` to `~/.config/quickshell/caelestia` and the two files in `config/` to `~/.config/caelestia/`.
+3. Link or copy `shell/` to `~/.config/quickshell/caelestia` and the files in `config/` to `~/.config/caelestia/`.
 4. Restart: `caelestia shell -k; caelestia shell -d`
 
 ## Known limits

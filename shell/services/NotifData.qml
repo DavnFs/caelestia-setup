@@ -217,6 +217,23 @@ QtObject {
             close();
     }
 
+    // Open like a desktop OS: the app's default action while it's still live, else focus or launch the app
+    function open(): void {
+        const action = actions.find(a => a.identifier === "default") ?? (actions.length === 1 ? actions[0] : null);
+        if (notification && action) {
+            action.invoke();
+            return;
+        }
+
+        const entry = DesktopEntries.heuristicLookup(hints?.["desktop-entry"] || appName);
+        const classes = [entry?.id, entry?.startupClass, appName].filter(c => c).map(c => c.toLowerCase());
+        const win = Hypr.toplevels.values.find(t => classes.includes(t.lastIpcObject?.class?.toLowerCase()));
+        if (win)
+            Hypr.dispatch(Hypr.usingLua ? `hl.dsp.focus({ window = "address:0x${win.address}" })` : `focuswindow address:0x${win.address}`);
+        else
+            entry?.execute();
+    }
+
     function close(): void {
         closed = true;
         if (locks.size === 0 && Notifs.list.includes(this)) {

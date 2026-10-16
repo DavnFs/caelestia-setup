@@ -73,7 +73,7 @@ LazyListView {
             scale: LazyListView.removing || LazyListView.adding ? 0.7 : 1
 
             hoverEnabled: true
-            cursorShape: notifInner.body?.hoveredLink ? Qt.PointingHandCursor : pressed ? Qt.ClosedHandCursor : undefined
+            cursorShape: pressed ? Qt.ClosedHandCursor : Qt.PointingHandCursor
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
             preventStealing: !root.expanded
             enabled: !(modelData?.closed ?? true)
@@ -94,6 +94,14 @@ LazyListView {
                     if (Math.abs(diffY) > Config.notifs.expandThreshold)
                         root.requestToggleExpand(diffY > 0);
                 }
+            }
+            // Not emitted after a swipe, so dragging to dismiss still works
+            onClicked: event => {
+                if (event.button !== Qt.LeftButton || notifInner.body?.hoveredLink)
+                    return;
+                modelData?.open();
+                root.screenState.sidebar = false;
+                root.screenState.dashboard = false;
             }
             onReleased: event => {
                 if (Math.abs(x) < width * Config.notifs.clearThreshold)

@@ -1,7 +1,7 @@
 {
     "appearance": {
         "transparency": {
-            "enabled": false
+            "enabled": true
         }
     },
     "bar": {
@@ -48,6 +48,7 @@
             }
         ],
         "position": "top",
+        "showOnHover": false,
         "statusIcons": [
             {
                 "enabled": true,
@@ -92,6 +93,9 @@
     "border": {
         "rounding": 0,
         "thickness": 0
+    },
+    "dashboard": {
+        "showClockSeconds": false
     },
     "general": {
         "apps": {

@@ -25,6 +25,12 @@ Item {
                 enabled: Config.dashboard.showDashboard
             },
             {
+                component: notifsComponent,
+                iconName: "notifications",
+                text: Tr.tr("Notifications"),
+                enabled: true
+            },
+            {
                 component: mediaComponent,
                 iconName: "queue_music",
                 text: Tr.tr("Media"),
@@ -159,6 +165,14 @@ Item {
                 Dash {
                     screenState: root.screenState
                     facePicker: root.facePicker
+                }
+            }
+
+            Component {
+                id: notifsComponent
+
+                NotifsTab {
+                    screenState: root.screenState
                 }
             }
 
