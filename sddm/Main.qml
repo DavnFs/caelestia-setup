@@ -35,8 +35,14 @@ Rectangle {
     height: 1080
     color: "black"
 
-    // Same font as the Caelestia lock screen (Rubik, installed system-wide)
-    readonly property string fontFamily: "Rubik"
+    // Same font as the Caelestia shell; loaded from the theme because the greeter can't read ~/.local/share/fonts
+    readonly property string fontFamily: googleSansFlex.name
+
+    FontLoader {
+        id: googleSansFlex
+
+        source: "assets/google-sans-flex/GoogleSansFlex.ttf"
+    }
 
     Timer {
         interval: 1000
@@ -256,7 +262,7 @@ Rectangle {
             color: "white"
             font.family: root.fontFamily
             font.weight: Font.DemiBold
-            // Rubik is a variable font; Qt only applies the weight through its axis
+            // Google Sans Flex is a variable font; Qt only applies the weight through its axis
             font.variableAxes: ({ "wght": 600 })
             visible: false
             layer.enabled: true

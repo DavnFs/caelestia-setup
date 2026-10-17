@@ -36,6 +36,12 @@ QtObject {
             category: "connectivity"
         },
         {
+            label: Tr.tr("Wi-Fi band"),
+            icon: "network_wifi",
+            description: Tr.tr("Band lock, latency, Anti-Lag Mode"),
+            category: "connectivity"
+        },
+        {
             label: Tr.tr("Connected devices"),
             icon: "devices_other",
             description: Tr.tr("Bluetooth, pairing"),

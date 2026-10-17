@@ -1,6 +1,6 @@
 # caelestia-setup
 
-My personal setup of the [Caelestia shell](https://github.com/caelestia-dots/shell) for Hyprland: a horizontal top bar, a cleaner workspace widget, a centred clock, battery info, a better per-app audio page, clickable notifications and a macOS-style lock screen.
+My personal setup of the [Caelestia shell](https://github.com/caelestia-dots/shell) for Hyprland: a horizontal top bar, a cleaner workspace widget, a centred clock, battery info, a better per-app audio page, clickable notifications, a macOS-style lock screen, a Wi-Fi band switcher and smoother motion.
 
 `shell/` is based on [caelestia-dots/shell PR #2076](https://github.com/caelestia-dots/shell/pull/2076) ("support all four screen edges") by [@alper-han](https://github.com/alper-han), with my changes on top. All credit for Caelestia goes to its authors. Licensed GPL-3.0 like the original.
 
@@ -37,8 +37,20 @@ My personal setup of the [Caelestia shell](https://github.com/caelestia-dots/she
 - Files: `modules/lock/Minimal.qml`, `modules/lock/NowPlaying.qml`, `modules/lock/LockSurface.qml`, `services/LockSettings.qml`, `modules/nexus/pages/LockScreenPage.qml`.
 
 **Boot login screen (SDDM)**
-- `sddm/Main.qml` restyles the [caelestia SDDM theme](https://github.com/ItsABigIgloo/caelestia-sddm) to match the lock screen: frosted date and clock in Rubik, "Enter Password" that turns into a password field as you type, restart/power buttons in the corner.
+- `sddm/Main.qml` restyles the [caelestia SDDM theme](https://github.com/ItsABigIgloo/caelestia-sddm) to match the lock screen: frosted date and clock in Google Sans Flex, "Enter Password" that turns into a password field as you type, restart/power buttons in the corner.
 - Install: `sudo sddm/install.sh` (backs up the theme's `Main.qml`, then syncs your wallpaper and colours). Re-run after the theme package updates.
+
+**Settings → Wi-Fi band** (for routers that put 2.4 and 5 GHz under one SSID)
+- Live band, channel, BSSID, signal and gateway ping/jitter.
+- Force 5 GHz, Force 2.4 GHz or Auto (NetworkManager `802-11-wireless.band`); falls back to the previous band if the forced one isn't reachable.
+- Anti-Lag Mode: locks to the current access point (`802-11-wireless.bssid`), which stops roaming and NetworkManager's background scans. Kept across band switches.
+- No root needed. Logic in `shell/assets/wifi-band.sh`, page in `modules/nexus/pages/WifiBandPage.qml`.
+
+**Look and motion**
+- UI font is Google Sans Flex (`appearance.font` in `shell.json`); install the font to `~/.local/share/fonts` first.
+- `config/fontconfig/50-default-sans.conf` makes it the default sans-serif so GTK/Qt apps match (Caelestia's Qt theme regenerates with "Sans Serif"). Websites without a named font change too.
+- `config/hypr-user.lua`: windows pop in from 90%, workspaces slide + fade, unfocused windows dim 8%.
+- Shell animations at 85% length (`appearance.anim.durations.scale`).
 
 **Hyprland special workspaces**
 - `config/cli.json` swaps Spotify for [Sidra](https://github.com/wimpysworld/sidra) (Apple Music) on the music workspace (Super + M).
@@ -50,6 +62,8 @@ shell/                 the patched shell (goes in ~/.config/quickshell/caelestia
 config/shell.json      bar layout, workspaces, labels  (goes in ~/.config/caelestia/)
 config/shell-tokens.json  bar height                   (goes in ~/.config/caelestia/)
 config/cli.json        special workspace apps (Sidra)  (goes in ~/.config/caelestia/)
+config/hypr-user.lua   animation and dim overrides     (goes in ~/.config/caelestia/)
+config/fontconfig/     default sans-serif font rule    (goes in ~/.config/fontconfig/conf.d/)
 sddm/                  boot login screen layout + install script
 ```
 

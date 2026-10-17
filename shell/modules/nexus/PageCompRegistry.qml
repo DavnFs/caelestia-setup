@@ -76,6 +76,14 @@ QtObject {
             }
         },
         Component {
+            // Wi-Fi band
+            StackPage {
+                Component {
+                    WifiBandPage {}
+                }
+            }
+        },
+        Component {
             // Bluetooth
             StackPage {
                 Component {

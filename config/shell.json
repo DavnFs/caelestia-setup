@@ -1,5 +1,26 @@
 {
     "appearance": {
+        "anim": {
+            "durations": {
+                "scale": 0.85
+            }
+        },
+        "font": {
+            "body": {
+                "family": "Google Sans Flex"
+            },
+            "clock": "Google Sans Flex",
+            "headline": {
+                "family": "Google Sans Flex"
+            },
+            "label": {
+                "family": "Google Sans Flex"
+            },
+            "title": {
+                "family": "Google Sans Flex"
+            },
+            "workspaces": "Google Sans Flex"
+        },
         "transparency": {
             "enabled": false
         }
@@ -105,6 +126,7 @@
         }
     },
     "services": {
+        "clockFormat": "TwentyFourHour",
         "dataUnits": "Decimal",
         "weatherUnits": "Celsius"
     }
