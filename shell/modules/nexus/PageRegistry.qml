@@ -14,6 +14,12 @@ QtObject {
             description: Tr.tr("Wallpaper, fonts, colours"),
             category: "appearance"
         },
+        {
+            label: Tr.tr("Lock screen"),
+            icon: "lock",
+            description: Tr.tr("Background, live wallpaper, widgets"),
+            category: "appearance"
+        },
 
         // Connectivity
         // TODO

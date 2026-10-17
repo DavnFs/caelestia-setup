@@ -2,6 +2,7 @@ import "center"
 import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
+import QtMultimedia
 import Quickshell
 import Quickshell.Services.UPower
 import Caelestia.Config
@@ -32,9 +33,9 @@ Item {
 
         anchors.fill: parent
 
-        CachingImage {
+        // Chosen in Settings → Lock screen. The desktop wallpaper stays underneath as a fallback
+        Item {
             anchors.fill: parent
-            path: Wallpapers.current
 
             layer.enabled: true
             layer.effect: MultiEffect {
@@ -47,6 +48,28 @@ Item {
                     Anim {
                         type: Anim.StandardLarge
                     }
+                }
+            }
+
+            CachingImage {
+                anchors.fill: parent
+                path: LockSettings.background === "image" && LockSettings.imagePath ? LockSettings.imagePath : Wallpapers.current
+            }
+
+            Loader {
+                anchors.fill: parent
+                active: LockSettings.background === "video" && !!LockSettings.videoPath
+
+                sourceComponent: Video {
+                    readonly property bool holdFrame: LockSettings.videoOnlyWhenCharging && UPower.onBattery
+
+                    source: `file://${LockSettings.videoPath}`
+                    fillMode: VideoOutput.PreserveAspectCrop
+                    loops: MediaPlayer.Infinite
+                    muted: true
+                    // Show a still frame instead of playing on battery, if chosen
+                    onHoldFrameChanged: holdFrame ? pause() : play()
+                    Component.onCompleted: holdFrame ? pause() : play()
                 }
             }
         }
@@ -103,21 +126,17 @@ Item {
             anchors.topMargin: 90 * root.s
             spacing: 0
 
-            StyledText {
+            GlassText {
                 Layout.alignment: Qt.AlignHCenter
                 text: Time.format("ddd d MMM")
-                color: root.fg
-                opacity: 0.9
                 font: Tokens.font.title.builders.medium.weight(Font.DemiBold).scale(1.15 * root.s).build()
             }
 
-            StyledText {
+            GlassText {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: -Tokens.spacing.small
                 // Qt only gives 12-hour "h" with an AM/PM marker; drop the marker like macOS does
                 text: Units.twelveHourClock ? Time.format("h:mm AP").split(" ")[0] : Time.format("HH:mm")
-                color: root.fg
-                opacity: 0.92
                 font: Tokens.font.headline.builders.large.scale(4.2 * root.s).weight(Font.DemiBold).build()
             }
         }
@@ -129,7 +148,7 @@ Item {
             s: root.s
             blurSource: background
             visible: opacity > 0
-            opacity: root.music ? 1 : 0
+            opacity: root.music && LockSettings.showMedia ? 1 : 0
 
             Behavior on opacity {
                 Anim {
@@ -192,6 +211,72 @@ Item {
                 anchors.right: parent.right
                 pam: root.lock.pam
             }
+        }
+    }
+
+    // Frosted-glass text, same recipe as the now-playing card: blurred background behind it, lightly tinted
+    component GlassText: Item {
+        id: glassText
+
+        property alias text: shape.text
+        property alias font: shape.font
+
+        implicitWidth: shape.implicitWidth
+        implicitHeight: shape.implicitHeight
+
+        // The letter shapes, used only as a mask
+        StyledText {
+            id: shape
+
+            anchors.fill: parent
+            color: "white"
+            visible: false
+            layer.enabled: true
+        }
+
+        Item {
+            id: fill
+
+            anchors.fill: parent
+            visible: false
+            layer.enabled: true
+
+            ShaderEffectSource {
+                id: behind
+
+                anchors.fill: parent
+                sourceItem: background
+                sourceRect: {
+                    glassText.x; glassText.y; glassText.width; glassText.height; foreground.scale; // Re-map on layout or intro/outro scale
+                    const p = glassText.mapToItem(background, 0, 0);
+                    return Qt.rect(p.x, p.y, glassText.width, glassText.height);
+                }
+                visible: false
+            }
+
+            MultiEffect {
+                anchors.fill: parent
+                source: behind
+                blurEnabled: true
+                blurMax: 48
+                blur: 1
+                saturation: 0.2
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                color: "white"
+                opacity: 0.55
+            }
+        }
+
+        MultiEffect {
+            anchors.fill: parent
+            source: fill
+            maskEnabled: true
+            maskSource: shape
+            maskThresholdMin: 0.3
+            maskSpreadAtMin: 0.3
         }
     }
 }

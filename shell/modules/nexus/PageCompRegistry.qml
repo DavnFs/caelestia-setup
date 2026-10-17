@@ -39,6 +39,14 @@ QtObject {
                 }
             }
         },
+        Component {
+            // Lock screen
+            StackPage {
+                Component {
+                    LockScreenPage {}
+                }
+            }
+        },
 
         // Connectivity
         Component {

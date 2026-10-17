@@ -48,7 +48,7 @@ Item {
             anchors.fill: parent
             sourceItem: root.blurSource
             sourceRect: {
-                root.x; root.y; root.width; root.height; // Re-map when the card moves or resizes
+                root.x; root.y; root.width; root.height; root.parent?.scale; // Re-map on move, resize, or intro/outro scale
                 const p = root.mapToItem(root.blurSource, 0, 0);
                 return Qt.rect(p.x, p.y, root.width, root.height);
             }

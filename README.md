@@ -30,10 +30,15 @@ My personal setup of the [Caelestia shell](https://github.com/caelestia-dots/she
 - New **Notifications** tab in the dashboard (the same list as the sidebar).
 
 **Lock screen (macOS style)**
-- Wallpaper background, date and big clock at the top, battery in the corner.
+- Date and big clock at the top in frosted glass (the background shows through, blurred), battery in the corner.
 - Frosted-glass now-playing widget (artwork, title, artist, progress, controls) while a player has a track loaded.
 - "Enter Password" hint at the bottom; the password field fades in when you start typing and the wallpaper blurs. Fingerprint/face messages still work.
-- Files: `modules/lock/Minimal.qml`, `modules/lock/NowPlaying.qml`, `modules/lock/LockSurface.qml`.
+- **Settings → Lock screen**: background (desktop wallpaper, an image, or a looping video as a live wallpaper, optionally only while charging) and a now-playing toggle. Saved in `~/.config/caelestia/lock.json`.
+- Files: `modules/lock/Minimal.qml`, `modules/lock/NowPlaying.qml`, `modules/lock/LockSurface.qml`, `services/LockSettings.qml`, `modules/nexus/pages/LockScreenPage.qml`.
+
+**Boot login screen (SDDM)**
+- `sddm/Main.qml` restyles the [caelestia SDDM theme](https://github.com/ItsABigIgloo/caelestia-sddm) to match the lock screen: frosted date and clock in Rubik, "Enter Password" that turns into a password field as you type, restart/power buttons in the corner.
+- Install: `sudo sddm/install.sh` (backs up the theme's `Main.qml`, then syncs your wallpaper and colours). Re-run after the theme package updates.
 
 **Hyprland special workspaces**
 - `config/cli.json` swaps Spotify for [Sidra](https://github.com/wimpysworld/sidra) (Apple Music) on the music workspace (Super + M).
@@ -45,6 +50,7 @@ shell/                 the patched shell (goes in ~/.config/quickshell/caelestia
 config/shell.json      bar layout, workspaces, labels  (goes in ~/.config/caelestia/)
 config/shell-tokens.json  bar height                   (goes in ~/.config/caelestia/)
 config/cli.json        special workspace apps (Sidra)  (goes in ~/.config/caelestia/)
+sddm/                  boot login screen layout + install script
 ```
 
 ## Install
