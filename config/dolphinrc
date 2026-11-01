@@ -1,0 +1,43 @@
+[CompactMode]
+IconSize=22
+PreviewSize=22
+
+[DetailsMode]
+IconSize=22
+PreviewSize=22
+
+[General]
+AutoExpandFolders=false
+BrowseThroughArchives=true
+ConfirmClosingMultipleTabs=true
+EnlargeSmallPreviews=true
+GlobalViewProps=true
+RenameInline=true
+ShowPasteBarAfterCopying=true
+ShowSelectionToggle=true
+ShowStatusBar=Disabled
+ShowToolTips=false
+ShowZoomSlider=false
+SortingChoice=0
+Version=202
+ViewPropsTimestamp=2026,10,6,20,56,56.157
+
+[IconsMode]
+IconSize=64
+MaximumTextLines=2
+PreviewSize=96
+TextWidthIndex=1
+UseSystemFont=true
+
+[KFileDialog Settings]
+Places Icons Auto-resize=false
+Places Icons Static Size=22
+
+[MainWindow]
+MenuBar=Disabled
+
+[PlacesPanel]
+IconSize=22
+
+[Search]
+Location=Everywhere

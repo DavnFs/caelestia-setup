@@ -1,0 +1,22 @@
+{
+    "theme": {
+        "colorScheme": "~/.config/qtengine/caelestia.colors",
+        "iconTheme": "Papirus-Light",
+        "style": "Darkly",
+        "font": {
+            "family": "Google Sans Flex",
+            "size": 11,
+            "weight": 400
+        },
+        "fontFixed": {
+            "family": "Google Sans Mono",
+            "size": 11,
+            "weight": 400
+        }
+    },
+    "misc": {
+        "menusHaveIcons": true,
+        "singleClickActivate": false,
+        "shortcutsForContextMenus": true
+    }
+}

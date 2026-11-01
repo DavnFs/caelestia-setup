@@ -1,0 +1,182 @@
+[ColorEffects:Disabled]
+changeselectioncolor = 
+color = #f4ede3
+coloramount = 0.5
+coloreffect = 3
+contrastamount = 0
+contrasteffect = 0
+enable = 
+intensityamount = 0
+intensityeffect = 0
+
+[ColorEffects:Inactive]
+changeselectioncolor = true
+color = #ffffff
+coloramount = 0.025
+coloreffect = 0
+contrastamount = 0.1
+contrasteffect = 0
+enable = false
+intensityamount = 0
+intensityeffect = 0
+
+[Colors:Button]
+backgroundalternate = #ebe2ce
+backgroundnormal = #eee7dd
+decorationfocus = #897324
+decorationhover = #897324
+foregroundactive = #1e1b15
+foregroundinactive = #7b7464
+foregroundlink = #559652
+foregroundnegative = #b47d00
+foregroundneutral = #d8a200
+foregroundnormal = #1e1b15
+foregroundpositive = #b7ac00
+foregroundvisited = #c06b00
+
+[Colors:Complementary]
+backgroundalternate = #fff8f0
+backgroundnormal = #f4ede3
+decorationfocus = #897324
+decorationhover = #897324
+foregroundactive = #333029
+foregroundinactive = #7b7464
+foregroundlink = #559652
+foregroundnegative = #b47d00
+foregroundneutral = #d8a200
+foregroundnormal = #4c4638
+foregroundpositive = #b7ac00
+foregroundvisited = #c06b00
+
+[Colors:Header]
+backgroundalternate = #f4ede3
+backgroundnormal = #f4ede3
+decorationfocus = #897324
+decorationhover = #897324
+foregroundactive = #333029
+foregroundinactive = #7b7464
+foregroundlink = #559652
+foregroundnegative = #b47d00
+foregroundneutral = #d8a200
+foregroundnormal = #4c4638
+foregroundpositive = #b7ac00
+foregroundvisited = #c06b00
+
+[Colors:Header][Inactive]
+backgroundalternate = #f4ede3
+backgroundnormal = #f4ede3
+decorationfocus = #897324
+decorationhover = #897324
+foregroundactive = #333029
+foregroundinactive = #7b7464
+foregroundlink = #559652
+foregroundnegative = #b47d00
+foregroundneutral = #d8a200
+foregroundnormal = #4c4638
+foregroundpositive = #b7ac00
+foregroundvisited = #c06b00
+
+[Colors:Selection]
+backgroundalternate = #897324
+backgroundnormal = #897324
+decorationfocus = #897324
+decorationhover = #695e3b
+foregroundactive = #ffffff
+foregroundinactive = #ffffff
+foregroundlink = #559652
+foregroundnegative = #b57d00
+foregroundneutral = #d9a200
+foregroundnormal = #ffffff
+foregroundpositive = #b8ac00
+foregroundvisited = #c06b00
+
+[Colors:Tooltip]
+backgroundalternate = #ebe2ce
+backgroundnormal = #f4ede3
+decorationfocus = #897324
+decorationhover = #897324
+foregroundactive = #1e1b15
+foregroundinactive = #7b7464
+foregroundlink = #559652
+foregroundnegative = #b47d00
+foregroundneutral = #d8a200
+foregroundnormal = #1e1b15
+foregroundpositive = #b7ac00
+foregroundvisited = #c06b00
+
+[Colors:View]
+backgroundalternate = #f4ede3
+backgroundnormal = #fff8f0
+decorationfocus = #897324
+decorationhover = #f1e2b6
+foregroundactive = #333029
+foregroundinactive = #7b7464
+foregroundlink = #559652
+foregroundnegative = #b47d00
+foregroundneutral = #d8a200
+foregroundnormal = #1e1b15
+foregroundpositive = #b7ac00
+foregroundvisited = #c06b00
+
+[Colors:Window]
+backgroundalternate = #ebe2ce
+backgroundnormal = #f4ede3
+decorationfocus = #897324
+decorationhover = #897324
+foregroundactive = #559652
+foregroundinactive = #7b7464
+foregroundlink = #559652
+foregroundnegative = #b47d00
+foregroundneutral = #d8a200
+foregroundnormal = #4c4638
+foregroundpositive = #b7ac00
+foregroundvisited = #c06b00
+
+[General]
+colorscheme = Caelestia
+colorschemehash = 0efb452114ece4d3338057cb89f434aff85d80d0
+xftantialias = true
+xfthintstyle = hintslight
+xftsubpixel = none
+font = Google Sans Flex,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
+menufont = Google Sans Flex,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
+smallestreadablefont = Google Sans Flex,9,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
+toolbarfont = Google Sans Flex,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
+name = Caelestia
+shadesortcolumn = true
+
+[Icons]
+theme = breeze-dark
+
+[KDE]
+animationdurationfactor = 0.75
+lookandfeelpackage = org.kde.breezedark.desktop
+contrast = 4
+framecontrast = 0.2
+
+[KFileDialog Settings]
+allow expansion = false
+automatically select filename extension = true
+breadcrumb navigation = true
+decoration position = 2
+show full path = false
+show inline previews = true
+show preview = false
+show speedbar = true
+show hidden files = false
+sort by = Name
+sort directories first = true
+sort hidden files last = false
+sort reversed = false
+speedbar width = 140
+view style = DetailTree
+
+[WM]
+activebackground = #e8e2d7
+activeblend = 227,229,231
+activefont = Noto Sans,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
+activeforeground = #1e1b15
+inactivebackground = #f1e2b6
+inactiveblend = 239,240,241
+inactiveforeground = #4c4638
+
