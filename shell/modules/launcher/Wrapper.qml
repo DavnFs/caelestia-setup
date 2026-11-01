@@ -8,6 +8,7 @@ import qs.modules.launcher.services
 Item {
     id: root
 
+    property var bar: null
     required property ScreenState screenState
     required property var panels
 
@@ -20,7 +21,8 @@ Item {
         return max;
     }
 
-    readonly property real slideOffset: (-implicitHeight - 5) * offsetScale
+    readonly property int openMargin: bar?.isFloating ? 10 : 0
+    readonly property real slideOffset: (-implicitHeight - openMargin - 15) * offsetScale
     property real offsetScale: shouldBeActive ? 0 : 1
 
     onShouldBeActiveChanged: {
@@ -31,9 +33,10 @@ Item {
     }
 
     visible: offsetScale < 1
-    anchors.bottomMargin: slideOffset
+    anchors.bottomMargin: openMargin + slideOffset
     implicitHeight: content.implicitHeight
     implicitWidth: content.implicitWidth || 630 // Hard coded fallback for first open
+    scale: 1 - 0.04 * offsetScale
     opacity: 1 - offsetScale
 
     Component.onCompleted: Qt.callLater(() => Apps) // Load apps on init

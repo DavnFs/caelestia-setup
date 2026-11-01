@@ -47,6 +47,14 @@ QtObject {
                 }
             }
         },
+        Component {
+            // Login screen
+            StackPage {
+                Component {
+                    LoginScreenPage {}
+                }
+            }
+        },
 
         // Connectivity
         Component {

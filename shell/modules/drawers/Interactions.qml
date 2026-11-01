@@ -70,7 +70,7 @@ CustomMouseArea {
         if (!popouts.hasCurrent || bounds.width <= 0 || bounds.height <= 0)
             return false;
 
-        const r = Config.border.rounding;
+        const r = Math.max(16, Config.border.rounding);
         return x >= bounds.x - r && x <= bounds.x + bounds.width + r && y >= bounds.y - r && y <= bounds.y + bounds.height + r;
     }
     function inDashboardTrigger(x: real, y: real): bool {
@@ -100,6 +100,11 @@ CustomMouseArea {
         return bar.position === "bottom" ? inTopPanel(panels.utilities, x, y) : inBottomPanel(panels.utilities, x, y, true);
     }
     function inBarEdge(x: real, y: real, clamped = false): bool {
+        if (bar.isFloating && BarPosition.isHorizontal(bar.position)) {
+            const barHeight = clamped ? bar.clampedHeight : bar.implicitHeight;
+            const yStart = bar.position === "top" ? bar.floatMarginV : height - bar.floatMarginV - barHeight;
+            return x >= bar.floatMarginH && x <= width - bar.floatMarginH && y >= yStart && y <= yStart + barHeight;
+        }
         const barWidth = clamped ? bar.clampedWidth : bar.implicitWidth;
         const barHeight = clamped ? bar.clampedHeight : bar.implicitHeight;
         return bar.position === "left" ? x < barWidth : bar.position === "right" ? x > width - barWidth : bar.position === "top" ? y < barHeight : y > height - barHeight;
@@ -112,9 +117,9 @@ CustomMouseArea {
             bar.handleWheel(event.y, event.angleDelta);
         } else if (pos === "right" && event.x > width - bar.implicitWidth) {
             bar.handleWheel(event.y, event.angleDelta);
-        } else if (pos === "top" && event.y < bar.implicitHeight) {
+        } else if (pos === "top" && inBarEdge(event.x, event.y)) {
             bar.handleWheel(event.x, event.angleDelta);
-        } else if (pos === "bottom" && event.y > height - bar.implicitHeight) {
+        } else if (pos === "bottom" && inBarEdge(event.x, event.y)) {
             bar.handleWheel(event.x, event.angleDelta);
         }
     }
@@ -122,6 +127,23 @@ CustomMouseArea {
     anchors.fill: parent
     acceptedButtons: fullscreen ? Qt.NoButton : Qt.AllButtons
     hoverEnabled: true
+
+    Timer {
+        id: popoutCloseTimer
+        interval: 350
+        repeat: false
+        onTriggered: {
+            if (!popouts.isDetached) {
+                const stillHovered = root.containsMouse && (inPopouts(root.mouseX, root.mouseY) || inBarEdge(root.mouseX, root.mouseY));
+                if (!stillHovered) {
+                    if (!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1) {
+                        popouts.hasCurrent = false;
+                        bar.closeTray();
+                    }
+                }
+            }
+        }
+    }
 
     onPressed: event => dragStart = Qt.point(event.x, event.y)
     onContainsMouseChanged: {
@@ -139,8 +161,11 @@ CustomMouseArea {
                 screenState.utilities = false;
 
             if (!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1) {
-                popouts.hasCurrent = false;
-                bar.closeTray();
+                if (popouts.hasCurrent) {
+                    popoutCloseTimer.restart();
+                } else {
+                    bar.closeTray();
+                }
             }
 
             if (Config.bar.showOnHover)
@@ -148,6 +173,8 @@ CustomMouseArea {
 
             if (Config.sidebar.showOnHover)
                 screenState.sidebar = false;
+        } else {
+            popoutCloseTimer.stop();
         }
     }
 
@@ -319,10 +346,14 @@ CustomMouseArea {
         // Below the edge trigger, non-title entries keep their normal hover routing.
         // Bar's title span excludes this region, so it cannot reopen the preview.
         if (inBar && (!inDashboard || y >= Math.max(Config.border.minThickness, borderThickness))) {
+            popoutCloseTimer.stop();
             bar.checkPopout(BarPosition.isHorizontal(bar.position) ? x : y);
-        } else if (!inDashboard && (!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1) && !inPopouts(x, y)) {
-            popouts.hasCurrent = false;
-            bar.closeTray();
+        } else if (inPopouts(x, y)) {
+            popoutCloseTimer.stop();
+        } else if (!inDashboard && (!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1)) {
+            if (popouts.hasCurrent && !popoutCloseTimer.running) {
+                popoutCloseTimer.restart();
+            }
         }
     }
 

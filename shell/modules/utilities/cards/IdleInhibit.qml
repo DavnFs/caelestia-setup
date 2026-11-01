@@ -9,12 +9,12 @@ import qs.services
 StyledRect {
     id: root
 
-    readonly property real nonAnimHeight: layout.implicitHeight + (IdleInhibitor.enabled ? activeChip.implicitHeight + activeChip.anchors.topMargin : 0) + Tokens.padding.extraLargeIncreased
+    readonly property real nonAnimHeight: layout.implicitHeight + (IdleInhibitor.enabled ? activeChip.implicitHeight + activeChip.anchors.topMargin : 0) + Tokens.padding.small * 2
 
     implicitHeight: nonAnimHeight
 
-    radius: Tokens.rounding.large
-    color: Colours.tPalette.m3surfaceContainer
+    radius: Tokens.rounding.full
+    color: Colours.tPalette.m3surfaceContainerLow
     clip: true
 
     RowLayout {
@@ -23,12 +23,12 @@ StyledRect {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.margins: Tokens.padding.large
-        spacing: Tokens.spacing.medium
+        anchors.margins: Tokens.padding.small
+        spacing: Tokens.spacing.small
 
         StyledRect {
             implicitWidth: implicitHeight
-            implicitHeight: icon.implicitHeight + Tokens.padding.large
+            implicitHeight: icon.implicitHeight + Tokens.padding.small
 
             radius: Tokens.rounding.full
             color: IdleInhibitor.enabled ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
@@ -39,7 +39,7 @@ StyledRect {
                 anchors.centerIn: parent
                 text: "coffee"
                 color: IdleInhibitor.enabled ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
-                fontStyle: Tokens.font.icon.large
+                fontStyle: Tokens.font.icon.medium
             }
         }
 
@@ -75,9 +75,9 @@ StyledRect {
         asynchronous: true
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        anchors.topMargin: Tokens.spacing.large
-        anchors.bottomMargin: IdleInhibitor.enabled ? Tokens.padding.large : -implicitHeight
-        anchors.leftMargin: Tokens.padding.large
+        anchors.topMargin: Tokens.spacing.small
+        anchors.bottomMargin: IdleInhibitor.enabled ? Tokens.padding.small : -implicitHeight
+        anchors.leftMargin: Tokens.padding.small
 
         opacity: IdleInhibitor.enabled ? 1 : 0
         scale: IdleInhibitor.enabled ? 1 : 0.5

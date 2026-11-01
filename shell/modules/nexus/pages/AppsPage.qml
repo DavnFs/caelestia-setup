@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import Quickshell.Widgets
 import Caelestia
 import Caelestia.Config
@@ -18,11 +19,43 @@ PageBase {
 
     title: Tr.tr("Apps")
 
+    property string docxApp: "WordCraft"
+    property string pdfApp: "PdfCraft"
+
+    function findAppName(id: string): string {
+        const apps = [...DesktopEntries.applications.values];
+        const base = id.replace(/\.desktop$/, "");
+        const app = apps.find(a => a.id === id || a.id === `${id}.desktop` || a.id.replace(/\.desktop$/, "") === base);
+        return app ? app.name : base;
+    }
+
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         width: root.cappedWidth
         spacing: Tokens.spacing.extraSmall / 2
+
+        Process {
+            running: true
+            command: ["xdg-mime", "query", "default", "application/pdf"]
+            stdout: StdioCollector {
+                onStreamFinished: {
+                    if (text.trim())
+                        root.pdfApp = root.findAppName(text.trim());
+                }
+            }
+        }
+
+        Process {
+            running: true
+            command: ["xdg-mime", "query", "default", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]
+            stdout: StdioCollector {
+                onStreamFinished: {
+                    if (text.trim())
+                        root.docxApp = root.findAppName(text.trim());
+                }
+            }
+        }
 
         // Default applications
         SectionHeader {
@@ -53,11 +86,37 @@ PageBase {
         }
 
         DefaultRow {
-            last: true
             icon: "folder"
             label: Tr.trCtx("File manager", "default app category")
             status: GlobalConfig.general.apps.explorer.join(" ")
             onSelected: app => GlobalConfig.general.apps.explorer = app.command
+        }
+
+        DefaultRow {
+            icon: "description"
+            label: Tr.tr("Document (Word / DOCX)")
+            status: root.docxApp
+            onSelected: app => {
+                Quickshell.execDetached([
+                    "sh", "-c",
+                    `xdg-mime default "${app.id}" application/vnd.openxmlformats-officedocument.wordprocessingml.document application/msword application/vnd.oasis.opendocument.text; update-desktop-database ~/.local/share/applications 2>/dev/null`
+                ]);
+                root.docxApp = app.name;
+            }
+        }
+
+        DefaultRow {
+            last: true
+            icon: "picture_as_pdf"
+            label: Tr.tr("PDF reader")
+            status: root.pdfApp
+            onSelected: app => {
+                Quickshell.execDetached([
+                    "sh", "-c",
+                    `xdg-mime default "${app.id}" application/pdf application/x-pdf; update-desktop-database ~/.local/share/applications 2>/dev/null`
+                ]);
+                root.pdfApp = app.name;
+            }
         }
 
         // Library

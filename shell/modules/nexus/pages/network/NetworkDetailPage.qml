@@ -20,6 +20,35 @@ PageBase {
     readonly property var ap: Nmcli.findNetwork(root.ssid)
     readonly property var details: Nmcli.wirelessDeviceDetails
     readonly property bool isActive: !!Nmcli.active && Nmcli.active.ssid === root.ssid
+    readonly property bool isSecure: root.ap ? (root.ap.isSecure ?? (root.ap.security && root.ap.security.length > 0)) : (Nmcli.savedSecurityFor(root.ssid) !== "none" && Nmcli.savedSecurityFor(root.ssid) !== "")
+    property bool connecting: false
+    property bool failed: false
+
+    function connect(): void {
+        const password = passwordField.text.trim();
+        root.failed = false;
+        root.connecting = true;
+
+        if (password.length > 0) {
+            NetworkConnection.connectWithPassword(root.ap || { ssid: root.ssid, bssid: "" }, password, result => {
+                root.connecting = false;
+                if (result && result.success) {
+                    root.failed = false;
+                } else {
+                    root.failed = true;
+                    passwordField.isError = true;
+                    passwordField.forceActiveFocus();
+                }
+            });
+        } else {
+            NetworkConnection.handleConnect(root.ap || { ssid: root.ssid, bssid: "", isSecure: root.isSecure }, null, network => {
+                root.connecting = false;
+                root.failed = true;
+                passwordField.isError = true;
+                passwordField.forceActiveFocus();
+            });
+        }
+    }
 
     // Locally-edited IPv4 form state.
     property string ipMethod: "auto" // "auto" | "auto-dns" | "manual"
@@ -89,6 +118,13 @@ PageBase {
             nState.closeSubPage();
     }
 
+    onSsidChanged: {
+        root.connecting = false;
+        root.failed = false;
+        if (passwordField)
+            passwordField.text = "";
+    }
+
     title: root.ssid || Tr.tr("Network")
     isSubPage: true
 
@@ -103,18 +139,77 @@ PageBase {
         width: root.cappedWidth
         spacing: Tokens.spacing.extraSmall / 2
 
+        Connections {
+            function onConnectionFailed(failedSsid: string): void {
+                if (root.ssid === failedSsid) {
+                    root.connecting = false;
+                    root.failed = true;
+                    if (passwordField.visible) {
+                        passwordField.isError = true;
+                        passwordField.forceActiveFocus();
+                    }
+                }
+            }
+
+            function onActiveChanged(): void {
+                if (root.isActive) {
+                    root.connecting = false;
+                    root.failed = false;
+                }
+            }
+
+            target: Nmcli
+        }
+
         // ---- Action buttons --------------------------------------------------
         ButtonRow {
             Layout.bottomMargin: Tokens.spacing.large - parent.spacing
             Layout.alignment: Qt.AlignHCenter
-            Layout.minimumWidth: Math.round(root.cappedWidth * (root.isActive ? 0.7 : 0.5))
+            Layout.minimumWidth: Math.round(root.cappedWidth * 0.7)
             spacing: Tokens.spacing.small
+
+            ButtonBase {
+                id: connectBtn
+
+                visible: !root.isActive
+                fillWidth: true
+                shapeMorph: Nmcli.hasSavedProfile(root.ssid)
+                isRound: true
+                inactiveColour: Colours.palette.m3primaryContainer
+                inactiveOnColour: Colours.palette.m3onPrimaryContainer
+
+                implicitWidth: connectLayout.implicitWidth + Tokens.padding.extraLarge * 2
+                implicitHeight: connectLayout.implicitHeight + Tokens.padding.medium * 2
+
+                onClicked: root.connect()
+
+                ColumnLayout {
+                    id: connectLayout
+
+                    anchors.centerIn: parent
+                    spacing: 0
+
+                    MaterialIcon {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: "wifi"
+                        color: connectBtn.onColour
+                        fontStyle: Tokens.font.icon.medium
+                    }
+
+                    StyledText {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: root.connecting ? Tr.tr("Connecting…") : Tr.tr("Connect")
+                        color: connectBtn.onColour
+                    }
+                }
+            }
 
             ButtonBase {
                 id: forgetBtn
 
+                visible: Nmcli.hasSavedProfile(root.ssid)
                 fillWidth: true
-                shapeMorph: root.isActive
+                shapeMorph: root.isActive || !Nmcli.hasSavedProfile(root.ssid)
                 isRound: true
                 inactiveColour: Colours.palette.m3errorContainer
                 inactiveOnColour: Colours.palette.m3onErrorContainer
@@ -188,6 +283,28 @@ PageBase {
             }
         }
 
+        // ---- Password (only when not active and secure) ----------------------
+        SectionHeader {
+            first: true
+            text: Tr.tr("Security")
+            visible: !root.isActive && root.isSecure
+        }
+
+        StyledTextField {
+            id: passwordField
+
+            Layout.fillWidth: true
+            visible: !root.isActive && root.isSecure
+            placeholderText: Nmcli.hasSavedProfile(root.ssid) ? Tr.tr("Enter new password to change") : Tr.tr("Password")
+            leadingIcon: "key"
+            echoMode: TextInput.Password
+            supportingText: root.failed ? Tr.tr("Connection failed — check the password") : (Nmcli.hasSavedProfile(root.ssid) ? Tr.tr("Leave empty to use saved password") : Tr.tr("WPA passwords are at least 8 characters"))
+            isError: root.failed
+            errorText: Tr.tr("Connection failed — check the password")
+
+            onAccepted: root.connect()
+        }
+
         // ---- Connection info (only shows when active) ---------------------------------
         SectionHeader {
             first: true
@@ -242,7 +359,7 @@ PageBase {
 
         // ---- Behaviour -------------------------------------------------------
         SectionHeader {
-            first: !root.isActive
+            first: !root.isActive && !root.isSecure
             text: Tr.tr("Behaviour")
         }
 

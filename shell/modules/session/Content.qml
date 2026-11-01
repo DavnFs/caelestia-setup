@@ -1,106 +1,201 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Caelestia
 import Caelestia.Config
+import Caelestia.I18n
 import Caelestia.Services
 import qs.components
-import qs.components.controls
 import qs.services
 import qs.utils
 
-Column {
+Item {
     id: root
 
     required property ScreenState screenState
     required property bool mirrored
-    readonly property real clampedPadding: CUtils.clamp(padding - Config.border.thickness, 0, padding)
 
-    padding: Tokens.padding.large
-    leftPadding: mirrored ? clampedPadding : padding
-    rightPadding: mirrored ? padding : clampedPadding
-    spacing: Tokens.spacing.large
+    implicitWidth: 190
+    implicitHeight: cardLayout.implicitHeight + cardLayout.anchors.margins * 2
 
-    SessionButton {
-        id: logout
+    StyledRect {
+        id: bg
 
-        icon: Config.session.icons.logout
-        command: Config.session.commands.logout
+        anchors.fill: parent
+        radius: Tokens.rounding.large
+        color: Colours.palette.m3surfaceContainer
+        border.color: Colours.palette.m3outlineVariant
+        border.width: 1
 
-        KeyNavigation.down: shutdown
+        layer.enabled: true
+        layer.smooth: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            blurMax: 15
+            shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.4)
+            shadowVerticalOffset: 3
+        }
+    }
 
-        Component.onCompleted: forceActiveFocus()
+    ColumnLayout {
+        id: cardLayout
 
-        Connections {
-            function onLauncherChanged(): void {
-                if (!root.screenState.launcher)
-                    logout.forceActiveFocus();
+        anchors.fill: parent
+        anchors.margins: 8
+        spacing: 5
+
+        ActionRow {
+            id: lockBtn
+
+            icon: "lock"
+            title: Tr.tr("Lock Screen")
+            onAction: () => {
+                Quickshell.execDetached(["caelestia", "shell", "lock", "lock"]);
             }
 
-            target: root.screenState
+            KeyNavigation.down: sleepBtn
+
+            Component.onCompleted: forceActiveFocus()
+
+            Connections {
+                function onSessionChanged(): void {
+                    if (root.screenState.session)
+                        lockBtn.forceActiveFocus();
+                }
+
+                target: root.screenState
+            }
+        }
+
+        ActionRow {
+            id: sleepBtn
+
+            icon: Config.session.icons.hibernate || "bedtime"
+            command: Config.session.commands.hibernate
+            title: Tr.tr("Sleep")
+
+            KeyNavigation.up: lockBtn
+            KeyNavigation.down: rebootBtn
+        }
+
+        ActionRow {
+            id: rebootBtn
+
+            icon: Config.session.icons.reboot || "restart_alt"
+            command: Config.session.commands.reboot
+            title: Tr.tr("Restart…")
+
+            KeyNavigation.up: sleepBtn
+            KeyNavigation.down: shutdownBtn
+        }
+
+        ActionRow {
+            id: shutdownBtn
+
+            icon: Config.session.icons.shutdown || "power_settings_new"
+            command: Config.session.commands.shutdown
+            title: Tr.tr("Shut Down…")
+            isDanger: true
+
+            KeyNavigation.up: rebootBtn
+            KeyNavigation.down: logoutBtn
+        }
+
+        StyledRect {
+            Layout.fillWidth: true
+            Layout.topMargin: 2
+            Layout.bottomMargin: 2
+            implicitHeight: 1
+            color: Colours.palette.m3outlineVariant
+            opacity: 0.5
+        }
+
+        ActionRow {
+            id: logoutBtn
+
+            icon: Config.session.icons.logout || "logout"
+            command: Config.session.commands.logout
+            title: Tr.tr("Log Out…")
+
+            KeyNavigation.up: shutdownBtn
         }
     }
 
-    SessionButton {
-        id: shutdown
-
-        icon: Config.session.icons.shutdown
-        command: Config.session.commands.shutdown
-
-        KeyNavigation.up: logout
-        KeyNavigation.down: hibernate
-    }
-
-    AnimatedImage {
-        width: Tokens.sizes.session.button
-        height: Tokens.sizes.session.button
-        sourceSize.width: width * ((QsWindow.window as QsWindow)?.devicePixelRatio ?? 1)
-
-        playing: visible
-        asynchronous: true
-        speed: Config.general.sessionGifSpeed
-        source: Paths.absolutePath(Config.paths.sessionGif)
-        fillMode: AnimatedImage.PreserveAspectFit
-    }
-
-    SessionButton {
-        id: hibernate
-
-        icon: Config.session.icons.hibernate
-        command: Config.session.commands.hibernate
-
-        KeyNavigation.up: shutdown
-        KeyNavigation.down: reboot
-    }
-
-    SessionButton {
-        id: reboot
-
-        icon: Config.session.icons.reboot
-        command: Config.session.commands.reboot
-
-        KeyNavigation.up: hibernate
-    }
-
-    component SessionButton: IconButton {
+    component ActionRow: StyledRect {
         id: button
 
-        required property list<string> command
+        focus: true
+        activeFocusOnTab: true
+
+        required property string icon
+        required property string title
+        property list<string> command: []
+        property bool isDanger: false
+        property var onAction: null
 
         function exec(): void {
-            if (!SessionManager.exec(command))
-                Quickshell.execDetached(command);
+            root.screenState.session = false;
+            if (onAction) {
+                onAction();
+            } else if (command.length > 0) {
+                if (!SessionManager.exec(command))
+                    Quickshell.execDetached(command);
+            }
         }
 
-        implicitWidth: Tokens.sizes.session.button
-        implicitHeight: Tokens.sizes.session.button
+        Layout.fillWidth: true
+        implicitHeight: 59
+        radius: Tokens.rounding.medium
 
-        inactiveColour: activeFocus ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainer
-        inactiveOnColour: activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-        radius: pressed ? Tokens.rounding.medium : activeFocus ? Tokens.rounding.extraLarge : Tokens.rounding.largeIncreased
-        font: Tokens.font.icon.builders.large.scale(1.3).build()
-        onClicked: exec()
+        color: {
+            if (mouseArea.pressed)
+                return isDanger ? Qt.alpha(Colours.palette.m3error, 0.2) : Colours.palette.m3secondaryContainer;
+            if (activeFocus)
+                return isDanger ? Qt.alpha(Colours.palette.m3error, 0.15) : Colours.tPalette.m3secondaryContainer;
+            if (mouseArea.containsMouse)
+                return isDanger ? Qt.alpha(Colours.palette.m3error, 0.08) : Colours.tPalette.m3surfaceContainerHigh;
+            return "transparent";
+        }
+
+        Behavior on color {
+            CAnim {}
+        }
+
+        MouseArea {
+            id: mouseArea
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: button.exec()
+        }
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: 12
+            anchors.rightMargin: 12
+            spacing: 12
+
+            MaterialIcon {
+                text: button.icon
+                color: button.isDanger
+                    ? Colours.palette.m3error
+                    : (button.activeFocus ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant)
+                fontStyle: Tokens.font.icon.builders.small.scale(1.15).build()
+            }
+
+            StyledText {
+                text: button.title
+                font: Tokens.font.body.builders.medium.weight(button.activeFocus ? Font.Medium : Font.Normal).build()
+                color: button.isDanger
+                    ? Colours.palette.m3error
+                    : Colours.palette.m3onSurface
+                Layout.fillWidth: true
+                elide: Text.ElideRight
+            }
+        }
 
         Keys.onEnterPressed: exec()
         Keys.onReturnPressed: exec()

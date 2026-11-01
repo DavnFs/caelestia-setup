@@ -7,12 +7,13 @@ import qs.components
 import qs.services
 import qs.utils
 
-Item {
+StyledRect {
     id: root
 
     required property var bar
     property bool isHorizontal: false
     property color colour: Colours.palette.m3primary
+    readonly property int paddingH: Tokens.padding.medium
 
     readonly property string windowTitle: {
         const title = Hypr.activeToplevel?.title;
@@ -26,7 +27,7 @@ Item {
         return title;
     }
 
-    readonly property real minimumAlong: (isHorizontal ? icon.implicitWidth : icon.implicitHeight) + Tokens.spacing.small
+    readonly property real minimumAlong: (isHorizontal ? icon.implicitWidth : icon.implicitHeight) + Tokens.spacing.small + paddingH * 2
     readonly property real maxAlong: {
         let otherAlong = 0;
         for (const child of bar.children) {
@@ -40,40 +41,40 @@ Item {
     property Title current: text1
 
     clip: true
-    implicitWidth: isHorizontal ? (icon.implicitWidth + current.implicitWidth + (current.text.length > 0 ? Tokens.spacing.small : 0)) : Math.max(icon.implicitWidth, current.implicitHeight)
-    implicitHeight: isHorizontal ? Math.max(icon.implicitHeight, current.implicitHeight) : (icon.implicitHeight + current.implicitWidth + current.anchors.topMargin)
+    implicitWidth: isHorizontal ? Math.max(minimumAlong, Math.min(maxAlong, icon.implicitWidth + current.implicitWidth + (current.text.length > 0 ? Tokens.spacing.small : 0) + paddingH * 2)) : Tokens.sizes.bar.innerWidth
+    implicitHeight: Tokens.sizes.bar.innerWidth
 
-    Loader {
-        asynchronous: true
-        width: root.width
-        height: parent.height
-        active: Config.bar.popouts.activeWindow && !Config.bar.activeWindow.showOnHover
+    color: stateLayer.containsMouse ? Colours.tPalette.m3surfaceContainerHigh : "transparent"
+    radius: Tokens.rounding.medium
+    border.width: 0
 
-        sourceComponent: MouseArea {
-            cursorShape: Qt.PointingHandCursor
-            hoverEnabled: true
-            containmentMask: QtObject {
-                function contains(point: point): bool {
-                    return root.bar.activeWindowContains(root, point.x);
-                }
-            }
-            onPositionChanged: {
-                const popouts = root.bar.popouts;
-                if (popouts.hasCurrent && popouts.currentName !== "activewindow")
-                    popouts.hasCurrent = false;
-            }
-            onClicked: event => {
-                // Keep delivered edge clicks consistent with hover ownership.
-                if (!root.bar.activeWindowContains(root, event.x))
-                    return;
-                const popouts = root.bar.popouts;
-                if (popouts.hasCurrent) {
-                    popouts.hasCurrent = false;
-                } else {
-                    popouts.currentName = "activewindow";
-                    popouts.currentCenter = root.bar.activeWindowCenter(root);
-                    popouts.hasCurrent = true;
-                }
+    Behavior on color {
+        CAnim {}
+    }
+
+    Behavior on implicitWidth {
+        Anim {}
+    }
+
+    Behavior on implicitHeight {
+        Anim {}
+    }
+
+    StateLayer {
+        id: stateLayer
+        anchors.fill: parent
+        radius: Tokens.rounding.medium
+        color: Colours.palette.m3primary
+        cursorShape: Qt.PointingHandCursor
+
+        onClicked: event => {
+            const popouts = root.bar.popouts;
+            if (popouts.hasCurrent) {
+                popouts.hasCurrent = false;
+            } else {
+                popouts.currentName = "activewindow";
+                popouts.currentCenter = root.bar.activeWindowCenter(root);
+                popouts.hasCurrent = true;
             }
         }
     }
@@ -83,11 +84,13 @@ Item {
 
         anchors.horizontalCenter: root.isHorizontal ? undefined : parent.horizontalCenter
         anchors.left: root.isHorizontal ? parent.left : undefined
+        anchors.leftMargin: root.isHorizontal ? root.paddingH : 0
         anchors.verticalCenter: root.isHorizontal ? parent.verticalCenter : undefined
 
         animate: true
         text: Icons.getAppCategoryIcon(Hypr.activeToplevel?.lastIpcObject.class, "desktop_windows")
         color: root.colour
+        fontStyle: Tokens.font.icon.small
     }
 
     Title {
@@ -102,9 +105,8 @@ Item {
         id: metrics
 
         text: root.windowTitle
-        font: root.Tokens.font.label.builders.small.letterSpacing(0.4).build()
+        font: root.Tokens.font.label.builders.small.letterSpacing(0.2).build()
         elide: Qt.ElideRight
-        // shortcut: quarter-bar cap keeps a left-side title from pushing the centred clock; derive from layout if bar entries change a lot
         elideWidth: Math.max(0, Math.min(root.maxAlong, root.isHorizontal ? root.bar.width / 4 : Infinity) - root.minimumAlong)
 
         onTextChanged: {
@@ -113,14 +115,6 @@ Item {
             root.current = next;
         }
         onElideWidthChanged: root.current.text = elidedText
-    }
-
-    Behavior on implicitWidth {
-        Anim {}
-    }
-
-    Behavior on implicitHeight {
-        Anim {}
     }
 
     component Title: StyledText {
@@ -135,7 +129,7 @@ Item {
         anchors.verticalCenter: root.isHorizontal ? icon.verticalCenter : undefined
 
         font: metrics.font
-        color: root.colour
+        color: Colours.palette.m3onSurface
         opacity: root.current === this ? 1 : 0
         horizontalAlignment: Text.AlignLeft
 

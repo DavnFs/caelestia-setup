@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Caelestia
 import Caelestia.Config
 import qs.components
@@ -21,14 +22,32 @@ Item {
     required property bool sourceMuted
     required property real brightness
 
-    implicitWidth: layout.implicitWidth + Tokens.padding.large + layout.anchors.horizontalCenterOffset * 2
-    implicitHeight: layout.implicitHeight + Tokens.padding.large * 2
+    implicitWidth: layout.implicitWidth + Tokens.padding.medium * 2
+    implicitHeight: layout.implicitHeight + Tokens.padding.medium * 2
+
+    StyledRect {
+        id: bg
+
+        anchors.fill: parent
+        radius: Tokens.rounding.large
+        color: Colours.palette.m3surfaceContainerLow
+        border.color: Colours.palette.m3outlineVariant
+        border.width: 1
+
+        layer.enabled: true
+        layer.smooth: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            blurMax: 12
+            shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.5)
+            shadowVerticalOffset: 3
+        }
+    }
 
     ColumnLayout {
         id: layout
 
         anchors.centerIn: parent
-        anchors.horizontalCenterOffset: CUtils.clamp(Tokens.padding.large - Config.border.thickness, 0, Tokens.padding.large) / 2
         spacing: Tokens.spacing.medium
 
         // Speaker volume

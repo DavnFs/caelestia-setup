@@ -62,7 +62,12 @@ ItemList {
 
         onClicked: {
             if (!modelData.active) {
-                NetworkConnection.handleConnect(modelData);
+                NetworkConnection.handleConnect(modelData, null, () => {
+                    network.currentSelected = false;
+                    root.nState.selectedNetworkSsid = modelData.ssid;
+                    root.nState.networkDetailsFromSaved = Nmcli.hasSavedProfile(modelData.ssid);
+                    root.nState.openSubPage(3);
+                });
                 currentSelected = true;
                 root.networkSelected(modelData);
             } else {
@@ -86,6 +91,15 @@ ItemList {
             }
 
             target: network.modelData
+        }
+
+        Connections {
+            function onConnectionFailed(failedSsid: string): void {
+                if (network.modelData.ssid === failedSsid)
+                    network.currentSelected = false;
+            }
+
+            target: Nmcli
         }
 
         Connections {

@@ -12,13 +12,30 @@ StyledRect {
 
     property bool isHorizontal: false
     readonly property color colour: Colours.palette.m3tertiary
-    readonly property int padding: Config.bar.clock.background ? Tokens.padding.medium : Tokens.padding.extraSmall
+    readonly property int padding: Tokens.padding.medium
 
     implicitWidth: isHorizontal ? content.implicitWidth + padding * 2 : Tokens.sizes.bar.innerWidth
     implicitHeight: isHorizontal ? Tokens.sizes.bar.innerWidth : content.implicitHeight + padding * 2
 
-    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Config.bar.clock.background ? Colours.tPalette.m3surfaceContainer.a : 0)
-    radius: Tokens.rounding.full
+    color: stateLayer.containsMouse ? Colours.tPalette.m3surfaceContainerHigh : "transparent"
+    radius: Tokens.rounding.medium
+    border.width: 0
+
+    Behavior on color {
+        CAnim {}
+    }
+
+    StateLayer {
+        id: stateLayer
+        anchors.fill: parent
+        radius: Tokens.rounding.medium
+        color: Colours.palette.m3tertiary
+        cursorShape: Qt.PointingHandCursor
+        onClicked: {
+            const screenState = ShellState.forActive();
+            screenState.dashboard = !screenState.dashboard;
+        }
+    }
 
     Loader {
         id: content

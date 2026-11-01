@@ -10,11 +10,13 @@ StyledRect {
 
     required property ScreenState screenState
 
-    implicitWidth: 620
-    implicitHeight: 460
+    implicitWidth: 860
+    implicitHeight: 480
+    width: implicitWidth
+    height: implicitHeight
 
-    radius: Tokens.rounding.large
-    color: Colours.tPalette.m3surfaceContainerLow
+    radius: Tokens.rounding.extraLarge
+    color: Colours.palette.m3surfaceContainer
 
     Sidebar.NotifDock {
         props: Sidebar.Props {

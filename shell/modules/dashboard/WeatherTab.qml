@@ -70,7 +70,7 @@ Item {
             implicitHeight: bigInfoRow.implicitHeight + Tokens.padding.small
 
             radius: Tokens.rounding.extraLarge * 2
-            color: Colours.tPalette.m3surfaceContainer
+            color: Colours.palette.m3surfaceContainer
 
             RowLayout {
                 id: bigInfoRow
@@ -158,7 +158,7 @@ Item {
                     implicitHeight: forecastItemColumn.implicitHeight + Tokens.padding.medium * 2
 
                     radius: Tokens.rounding.large
-                    color: Colours.tPalette.m3surfaceContainer
+                    color: Colours.palette.m3surfaceContainer
 
                     ColumnLayout {
                         id: forecastItemColumn
@@ -216,7 +216,7 @@ Item {
         Layout.fillWidth: true
         Layout.preferredHeight: 60
         radius: Tokens.rounding.medium
-        color: Colours.tPalette.m3surfaceContainer
+        color: Colours.palette.m3surfaceContainer
 
         Row {
             anchors.centerIn: parent

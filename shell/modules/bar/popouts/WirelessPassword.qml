@@ -131,7 +131,7 @@ ColumnLayout {
         Layout.preferredWidth: 400
         implicitHeight: content.implicitHeight + Tokens.padding.extraLargeIncreased
         radius: Tokens.rounding.large
-        color: Colours.tPalette.m3surfaceContainer
+        color: Colours.palette.m3surfaceContainer
         visible: root.shouldBeVisible || root.isClosing
         opacity: root.shouldBeVisible && !root.isClosing ? 1 : 0
         scale: root.shouldBeVisible && !root.isClosing ? 1 : 0.7
@@ -340,7 +340,7 @@ ColumnLayout {
                 StyledRect {
                     anchors.fill: parent
                     radius: Tokens.rounding.large
-                    color: passwordContainer.activeFocus ? Qt.lighter(Colours.tPalette.m3surfaceContainer, 1.05) : Colours.tPalette.m3surfaceContainer
+                    color: passwordContainer.activeFocus ? Qt.lighter(Colours.palette.m3surfaceContainer, 1.05) : Colours.palette.m3surfaceContainer
                     border.width: passwordContainer.activeFocus || connectButton.hasError ? 4 : (root.shouldBeVisible ? 1 : 0)
                     border.color: {
                         if (connectButton.hasError) {
@@ -541,6 +541,7 @@ ColumnLayout {
                                 enabled = true;
                                 text = Tr.tr("Connect");
                                 passwordContainer.passwordBuffer = "";
+                                passwordContainer.forceActiveFocus();
                                 // Delete the failed connection
                                 if (root.network && root.network.ssid) {
                                     Nmcli.forgetNetwork(root.network.ssid);
@@ -614,6 +615,7 @@ ColumnLayout {
                 connectButton.enabled = true;
                 connectButton.text = Tr.tr("Connect");
                 passwordContainer.passwordBuffer = "";
+                passwordContainer.forceActiveFocus();
                 // Delete the failed connection
                 Nmcli.forgetNetwork(ssid);
             }

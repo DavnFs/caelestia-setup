@@ -25,6 +25,8 @@ Scope {
     readonly property alias howdy: howdy
 
     property string lockMessage
+    // True between the sleep signal and resume; scans must not run while asleep
+    property bool sleeping
     property int state
     property string buffer
 
@@ -173,6 +175,24 @@ Scope {
         target: root.lock
     }
 
+    // Like KDE/GNOME: release the fingerprint reader (and camera) before sleep so the USB device can power down,
+    // then resume scanning on wake if still locked
+    Connections {
+        function onAboutToSleep(): void {
+            root.sleeping = true;
+            fprint.abort();
+            howdy.abort();
+        }
+
+        function onResumed(): void {
+            root.sleeping = false;
+            if (root.lock.locked)
+                root.restartFprint();
+        }
+
+        target: SessionManager
+    }
+
     Connections {
         function onEnableFprintChanged(): void {
             root.restartFprint();
@@ -211,7 +231,8 @@ Scope {
         }
 
         function start(): void {
-            pam.start();
+            if (!root.sleeping)
+                pam.start();
         }
 
         function abort(): void {
@@ -266,7 +287,7 @@ Scope {
             id: errorRetry
 
             interval: 800
-            onTriggered: pam.start()
+            onTriggered: ctx.start()
         }
 
         Timer {

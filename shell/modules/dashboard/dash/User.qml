@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import M3Shapes
+import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
@@ -17,42 +17,62 @@ Item {
     required property ScreenState screenState
     required property FileDialog facePicker
 
-    property color pfpFallbackColour: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
-
     anchors.fill: parent
     anchors.margins: Tokens.padding.large
 
-    Behavior on pfpFallbackColour {
-        CAnim {}
-    }
+    RowLayout {
+        anchors.fill: parent
+        spacing: Tokens.spacing.medium
 
-    Item {
-        id: pfpContainer
+        // Avatar
+        Item {
+            implicitWidth: parent.height
+            implicitHeight: parent.height
 
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.left: logoShape.right
-        anchors.leftMargin: -(Tokens.padding.largeIncreased + Tokens.padding.extraLarge) / 2
-        implicitWidth: height
+            StyledClippingRect {
+                id: pfpClip
 
-        MaterialShape {
-            id: shape
+                anchors.fill: parent
+                radius: Tokens.rounding.full
+                color: Colours.palette.m3surfaceContainerHighest
 
-            anchors.centerIn: parent
-            implicitSize: parent.height
-            shape: MaterialShape.Pill
-            color: Qt.alpha(root.pfpFallbackColour, 1)
-            opacity: root.pfpFallbackColour.a
-            layer.enabled: true
+                CachingImage {
+                    id: pfp
+
+                    anchors.fill: parent
+                    path: `${Paths.home}/.face`
+                }
+
+                MaterialIcon {
+                    anchors.centerIn: parent
+                    text: "person"
+                    color: Colours.palette.m3onSurfaceVariant
+                    fontStyle: Tokens.font.icon.large
+                    visible: pfp.status !== Image.Ready
+                }
+
+                StyledRect {
+                    anchors.fill: parent
+                    color: Qt.alpha(Colours.palette.m3scrim, 0.45)
+                    opacity: mouse.containsMouse ? 1 : 0
+
+                    Behavior on opacity {
+                        Anim {
+                            type: Anim.DefaultEffects
+                        }
+                    }
+
+                    MaterialIcon {
+                        anchors.centerIn: parent
+                        text: "edit"
+                        color: Colours.palette.m3onPrimary
+                        fontStyle: Tokens.font.icon.medium
+                    }
+                }
+            }
 
             MouseArea {
                 id: mouse
-
-                containmentMask: QtObject {
-                    function contains(pt: point): bool {
-                        return shape.contains(pt) && !logoShape.contains(mouse.mapToItem(logoShape, pt)) && !uptimeShape.contains(mouse.mapToItem(uptimeShape, pt));
-                    }
-                }
 
                 anchors.fill: parent
                 hoverEnabled: true
@@ -64,214 +84,104 @@ Item {
             }
         }
 
-        Item {
-            anchors.fill: parent
-            layer.enabled: true
-            layer.effect: Mask {
-                maskSource: shape
-            }
+        // User info & chips
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignVCenter
+            spacing: 6
 
-            Loader {
-                anchors.centerIn: parent
-                asynchronous: true
-                active: pfp.status !== Image.Ready
+            RowLayout {
+                spacing: Tokens.spacing.small
 
-                sourceComponent: MaterialIcon {
-                    text: "person_add"
-                    color: Colours.palette.m3onSurfaceVariant
-                    fontStyle: Tokens.font.icon.extraLarge
-                    fill: 1
-                    grade: -2 // Ugh material symbols are such a pain with fill
-                }
-            }
-
-            CachingImage {
-                id: pfp
-
-                anchors.fill: parent
-                path: `${Paths.home}/.face`
-            }
-
-            StyledRect {
-                anchors.fill: parent
-                color: Qt.alpha(Colours.palette.m3scrim, pfp.status === Image.Ready ? 0.4 : 0)
-                opacity: mouse.containsMouse ? 1 : 0
-                layer.enabled: opacity < 1
-
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
+                StyledText {
+                    text: SysInfo.user
+                    color: Colours.palette.m3onSurface
+                    font: Tokens.font.title.medium
                 }
 
-                MaterialShape {
-                    anchors.centerIn: parent
-                    implicitSize: parent.height * 0.7
-                    shape: MaterialShape.Diamond
-                    color: Colours.palette.m3primary
-                    scale: mouse.pressed ? 0.9 : mouse.containsMouse ? 1 : 0.7
+                StyledRect {
+                    radius: Tokens.rounding.full
+                    color: Colours.palette.m3secondaryContainer
+                    implicitHeight: wmRow.implicitHeight + 4
+                    implicitWidth: wmRow.implicitWidth + 12
 
-                    Behavior on color {
-                        CAnim {}
-                    }
+                    RowLayout {
+                        id: wmRow
 
-                    Behavior on scale {
-                        Anim {
-                            type: Anim.FastSpatial
+                        anchors.centerIn: parent
+                        spacing: 4
+
+                        MaterialIcon {
+                            text: "desktop_windows"
+                            color: Colours.palette.m3onSecondaryContainer
+                            fontStyle: Tokens.font.icon.small
+                        }
+
+                        StyledText {
+                            text: SysInfo.wm
+                            color: Colours.palette.m3onSecondaryContainer
+                            font: Tokens.font.label.small
                         }
                     }
-
-                    MaterialIcon {
-                        anchors.centerIn: parent
-                        text: "person_edit"
-                        color: Colours.palette.m3onPrimary
-                        fontStyle: Tokens.font.icon.large
-                    }
                 }
             }
-        }
-    }
 
-    MaterialShape {
-        id: logoShape
+            RowLayout {
+                spacing: Tokens.spacing.small
 
-        x: Tokens.padding.extraSmall
-        implicitSize: Tokens.sizes.dashboard.logoSize + Tokens.padding.small * 2
-        shape: MaterialShape.Gem
-        color: Colours.palette.m3primaryContainer
+                // Uptime chip
+                StyledRect {
+                    radius: Tokens.rounding.full
+                    color: Colours.palette.m3tertiaryContainer
+                    implicitHeight: uptimeRow.implicitHeight + 4
+                    implicitWidth: uptimeRow.implicitWidth + 12
 
-        Behavior on color {
-            CAnim {}
-        }
+                    RowLayout {
+                        id: uptimeRow
 
-        Loader {
-            anchors.centerIn: parent
-            sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : osLogo
-        }
-    }
+                        anchors.centerIn: parent
+                        spacing: 4
 
-    Component {
-        id: osLogo
+                        MaterialIcon {
+                            text: "schedule"
+                            color: Colours.palette.m3onTertiaryContainer
+                            fontStyle: Tokens.font.icon.small
+                        }
 
-        ColouredIcon {
-            id: icon
+                        StyledText {
+                            text: Tr.trCtx("up %1", "system uptime").arg(SysInfo.uptimeShort)
+                            color: Colours.palette.m3onTertiaryContainer
+                            font: Tokens.font.label.small
+                        }
+                    }
+                }
 
-            source: SysInfo.osLogo
-            implicitSize: Tokens.sizes.dashboard.logoSize
-            colour: Colours.palette.m3onPrimaryContainer
-        }
-    }
+                // OS / Distro badge
+                StyledRect {
+                    radius: Tokens.rounding.full
+                    color: Colours.palette.m3surfaceContainerHigh
+                    implicitHeight: osRow.implicitHeight + 4
+                    implicitWidth: osRow.implicitWidth + 12
 
-    Component {
-        id: caelestiaLogo
+                    RowLayout {
+                        id: osRow
 
-        Logo {
-            implicitWidth: Tokens.sizes.dashboard.logoSize
-            implicitHeight: Tokens.sizes.dashboard.logoSize
-            topColour: Colours.palette.m3primary
-            bottomColour: Colours.palette.m3onPrimaryContainer
-        }
-    }
+                        anchors.centerIn: parent
+                        spacing: 4
 
-    MaterialShape {
-        id: uptimeShape
+                        ColouredIcon {
+                            source: SysInfo.osLogo
+                            implicitSize: 12
+                            colour: Colours.palette.m3onSurfaceVariant
+                        }
 
-        anchors.bottom: parent.bottom
-        anchors.left: pfpContainer.right
-        anchors.bottomMargin: -Tokens.padding.small // Clamshell is taller than what it is visually
-        anchors.leftMargin: -Tokens.padding.extraLargeIncreased
-        implicitSize: Tokens.sizes.dashboard.uptimeSize + Tokens.padding.small * 2
-        shape: MaterialShape.ClamShell
-        color: Colours.palette.m3tertiaryContainer
-
-        Behavior on color {
-            CAnim {}
-        }
-
-        MaterialIcon {
-            anchors.centerIn: parent
-            text: "clock_arrow_up"
-            color: Colours.palette.m3onTertiaryContainer
-            fontStyle: Tokens.font.icon.medium
-        }
-    }
-
-    StyledText {
-        anchors.left: uptimeShape.right
-        anchors.verticalCenter: uptimeShape.verticalCenter
-        anchors.leftMargin: Tokens.spacing.small
-        anchors.verticalCenterOffset: Math.round(fontInfo.pointSize * 0.1)
-
-        // TRANSLATORS: %1 = system uptime, e.g. "2 days, 3 hours"
-        text: Tr.trCtx("up %1", "system uptime").arg(SysInfo.uptimeShort)
-        width: Tokens.sizes.dashboard.userWidth - x - Tokens.padding.extraLarge
-        elide: Text.ElideRight
-    }
-
-    StyledRect {
-        id: bubble1
-
-        anchors.left: pfpContainer.right
-        anchors.top: bubble2.bottom
-        anchors.leftMargin: Tokens.spacing.small
-        anchors.topMargin: -Tokens.spacing.extraSmall
-
-        implicitWidth: 10
-        implicitHeight: 10
-        radius: Tokens.rounding.full
-        color: Colours.palette.m3secondaryContainer
-    }
-
-    StyledRect {
-        id: bubble2
-
-        anchors.left: bubble1.right
-        anchors.verticalCenter: wmContainer.bottom
-        anchors.leftMargin: Tokens.spacing.extraSmall
-
-        implicitWidth: 15
-        implicitHeight: 15
-        radius: Tokens.rounding.full
-        color: Colours.palette.m3secondaryContainer
-    }
-
-    StyledRect {
-        id: wmContainer
-
-        anchors.left: bubble2.left
-        anchors.leftMargin: -Tokens.padding.medium
-        y: Tokens.padding.extraSmall
-
-        radius: Tokens.rounding.largeIncreased
-        color: Colours.palette.m3secondaryContainer
-        implicitWidth: wmLabel.implicitWidth + Tokens.padding.medium * 2
-        implicitHeight: wmLabel.implicitHeight + Tokens.padding.small * 2
-
-        Row {
-            id: wmLabel
-
-            anchors.centerIn: parent
-            spacing: Tokens.spacing.extraSmall
-
-            MaterialIcon {
-                id: wmIcon
-
-                anchors.verticalCenter: parent.verticalCenter
-                text: "select_window"
-                color: Colours.palette.m3onSecondaryContainer
-                fontStyle: wmText.font
-            }
-
-            StyledText {
-                id: wmText
-
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.verticalCenterOffset: Math.round(fontInfo.pointSize * 0.1)
-                text: SysInfo.wm + "..."
-                color: Colours.palette.m3onSecondaryContainer
-                font: Tokens.font.body.builders.small.vaxis("slnt", -4).build()
-                width: Math.min(implicitWidth, Tokens.sizes.dashboard.userWidth - wmContainer.x - Tokens.padding.medium * 2 - wmIcon.implicitWidth - wmLabel.spacing - Tokens.padding.extraLarge)
-                elide: Text.ElideRight
+                        StyledText {
+                            text: SysInfo.distro || "Linux"
+                            color: Colours.palette.m3onSurfaceVariant
+                            font: Tokens.font.label.small
+                        }
+                    }
+                }
             }
         }
     }

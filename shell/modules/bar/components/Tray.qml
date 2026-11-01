@@ -36,8 +36,10 @@ StyledRect {
     implicitWidth: isHorizontal ? nonAnimAlong : Tokens.sizes.bar.innerWidth
     implicitHeight: isHorizontal ? Tokens.sizes.bar.innerWidth : nonAnimAlong
 
-    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, (Config.bar.tray.background && items.count > 0) ? Colours.tPalette.m3surfaceContainer.a : 0)
-    radius: Tokens.rounding.full
+    color: (Config.bar.tray.background && items.count > 0) ? Colours.tPalette.m3surfaceContainerHigh : "transparent"
+    radius: 12
+    border.color: (Config.bar.tray.background && items.count > 0) ? Colours.palette.m3outlineVariant : "transparent"
+    border.width: (Config.bar.tray.background && items.count > 0) ? 1 : 0
 
     Grid {
         id: layout

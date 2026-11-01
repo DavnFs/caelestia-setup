@@ -70,12 +70,32 @@ Singleton {
 
     signal connectionFailed(string ssid)
 
+    onConnectionFailed: ssid => {
+        if (ssid && ssid.length > 0) {
+            Quickshell.execDetached(["notify-send", "-a", "caelestia-shell", "-u", "normal", "-i", "network-wireless-offline-symbolic", Tr.tr("Wi-Fi Connection Failed"), Tr.tr("Failed to connect to %1. Please check your password.").arg(ssid)]);
+        }
+    }
+
     function detectPasswordRequired(error: string): bool {
         if (!error || error.length === 0) {
             return false;
         }
 
-        return (error.includes("Secrets were required") || error.includes("Secrets were required, but not provided") || error.includes("No secrets provided") || error.includes("802-11-wireless-security.psk") || error.includes("password for") || (error.includes("password") && !error.includes("Connection activated") && !error.includes("successfully")) || (error.includes("Secrets") && !error.includes("Connection activated") && !error.includes("successfully")) || (error.includes("802.11") && !error.includes("Connection activated") && !error.includes("successfully"))) && !error.includes("Connection activated") && !error.includes("successfully");
+        const lower = error.toLowerCase();
+        return (lower.includes("secrets were required")
+            || lower.includes("secrets were required, but not provided")
+            || lower.includes("no secrets provided")
+            || lower.includes("802-11-wireless-security.psk")
+            || lower.includes("password for")
+            || lower.includes("authentication failed")
+            || lower.includes("authorization failed")
+            || lower.includes("bad decrypt")
+            || lower.includes("invalid key")
+            || lower.includes("wrong password")
+            || (lower.includes("password") && !lower.includes("connection activated") && !lower.includes("successfully"))
+            || (lower.includes("secrets") && !lower.includes("connection activated") && !lower.includes("successfully"))
+            || (lower.includes("802.11") && !lower.includes("connection activated") && !lower.includes("successfully"))
+        ) && !lower.includes("connection activated") && !lower.includes("successfully");
     }
 
     function parseNetworkOutput(output: string): list<var> {
@@ -468,9 +488,19 @@ Singleton {
                 Qt.callLater(() => {
                     connectWireless(ssid, password, bssid, callback, retries + 1);
                 }, 1000);
-            } else if (!result.success && root.pendingConnection) {} else if (result.success && callback) {} else if (!result.success && !root.pendingConnection) {
+            } else if (!result.success) {
+                if (root.pendingConnection) {
+                    const failedSsid = root.pendingConnection.ssid;
+                    root.pendingConnection = null;
+                    connectionCheckTimer.stop();
+                    immediateCheckTimer.stop();
+                    immediateCheckTimer.checkCount = 0;
+                    root.connectionFailed(failedSsid);
+                }
                 if (callback)
                     callback(result);
+            } else if (result.success && callback) {
+                callback(result);
             }
         });
     }
@@ -1507,7 +1537,7 @@ Singleton {
     Timer {
         id: connectionCheckTimer
 
-        interval: 4000
+        interval: 25000
         onTriggered: {
             if (root.pendingConnection) {
                 const connected = root.active && root.active.ssid === root.pendingConnection.ssid;

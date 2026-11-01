@@ -43,7 +43,7 @@ StyledWindow {
     readonly property real shadowOpacity: 0.7 * (1 - fsTransitionProg)
     readonly property real borderLayoutThickness: hasFullscreen ? 0 : contentItem.Config.border.thickness
 
-    property color surfaceColour: Colours.tPalette.m3surface
+    property color surfaceColour: Colours.palette.m3surface
 
     readonly property int dragMaskPadding: {
         if (focusGrab.active || panels.popouts.isDetached)
@@ -104,6 +104,15 @@ StyledWindow {
             width: bounds.width
             height: bounds.height
         }
+
+        Region {
+            readonly property rect bounds: panels.toastsRect
+
+            x: bounds.x
+            y: bounds.y
+            width: bounds.width
+            height: bounds.height
+        }
     }
 
     Regions {
@@ -154,7 +163,8 @@ StyledWindow {
     Item {
         anchors.fill: parent
         opacity: root.surfaceColour.a
-        layer.enabled: true
+        layer.enabled: (!bar.isFloating && (sessionBg.visible || sidebarBg.visible || osdBg.visible || dashBg.visible || launcherBg.visible || utilsBg.visible || popoutBg.visible || notifsBg.visible)) || root.borderThickness > 0
+        layer.smooth: true
         layer.effect: MultiEffect {
             shadowEnabled: true
             blurMax: 15
@@ -172,11 +182,12 @@ StyledWindow {
             anchors.fill: parent
             anchors.margins: -50 // Make border thicker to smooth out bulge from closed drawers
             group: blobGroup
+            visible: root.borderThickness > 0 || (!bar.isFloating && (BarPosition.isTop(bar.position) || BarPosition.isBottom(bar.position)))
             radius: root.borderRounding
             borderLeft: (BarPosition.isLeft(bar.position) ? bar.implicitWidth : root.borderThickness) - anchors.margins - root.sdfBorderOffset
             borderRight: (BarPosition.isRight(bar.position) ? bar.implicitWidth : root.borderThickness) - anchors.margins - root.sdfBorderOffset
-            borderTop: (BarPosition.isTop(bar.position) ? bar.implicitHeight : root.borderThickness) - anchors.margins - root.sdfBorderOffset
-            borderBottom: (BarPosition.isBottom(bar.position) ? bar.implicitHeight : root.borderThickness) - anchors.margins - root.sdfBorderOffset
+            borderTop: (!bar.isFloating && BarPosition.isTop(bar.position) ? bar.implicitHeight : root.borderThickness) - anchors.margins - root.sdfBorderOffset
+            borderBottom: (!bar.isFloating && BarPosition.isBottom(bar.position) ? bar.implicitHeight : root.borderThickness) - anchors.margins - root.sdfBorderOffset
         }
 
         PanelBg {
@@ -184,6 +195,8 @@ StyledWindow {
 
             panel: panels.dashboard
             deformAmount: 0.1
+            group: (!bar.isFloating && panel.visible) ? blobGroup : null
+            visible: !bar.isFloating && panel.visible
         }
 
         PanelBg {
@@ -191,6 +204,8 @@ StyledWindow {
 
             panel: panels.launcher
             deformAmount: 0.1
+            group: (!bar.isFloating && panel.visible) ? blobGroup : null
+            visible: !bar.isFloating && panel.visible
         }
 
         PanelBg {
@@ -198,6 +213,8 @@ StyledWindow {
 
             panel: panels.session
             deformAmount: 0.2
+            group: (!bar.isFloating && panel.visible) ? blobGroup : null
+            visible: !bar.isFloating && panel.visible
         }
 
         PanelBg {
@@ -208,6 +225,8 @@ StyledWindow {
             panel: panels.sidebar
             deformAmount: 0.03
             implicitHeight: panel.height * (1 / rawDeformMatrix.m22) + 2
+            group: (!bar.isFloating && panel.visible) ? blobGroup : null
+            visible: !bar.isFloating && panel.visible
             exclude: panels.sidebar.offsetScale > 0.08 ? [] : [utilsBg]
             topLeftRadius: !panels.barOnRight && panels.barOnBottom ? joinRadius : radius
             bottomLeftRadius: !panels.barOnRight && !panels.barOnBottom ? joinRadius : radius
@@ -220,12 +239,15 @@ StyledWindow {
 
             panel: panels.osd
             deformAmount: 0.25
+            group: (!bar.isFloating && panel.visible) ? blobGroup : null
+            visible: !bar.isFloating && panel.visible
         }
 
         PanelBg {
             id: notifsBg
 
             panel: panels.notifications
+            visible: !bar.isFloating && panel.visible
         }
 
         PanelBg {
@@ -233,6 +255,8 @@ StyledWindow {
 
             panel: panels.utilities
             deformAmount: panels.sidebar.visible ? 0.1 : 0.15
+            group: (!bar.isFloating && panel.visible) ? blobGroup : null
+            visible: !bar.isFloating && panel.visible
             exclude: panels.sidebar.offsetScale > 0.08 ? [] : [sidebarBg]
             topLeftRadius: !panels.barOnRight && !panels.barOnBottom ? sidebarBg.joinRadius : radius
             bottomLeftRadius: !panels.barOnRight && panels.barOnBottom ? sidebarBg.joinRadius : radius
@@ -250,6 +274,8 @@ StyledWindow {
             property real extraScale: panels.popouts.isDetached ? 0 : 0.15
 
             panel: panels.popoutsWrapper
+            group: (!bar.isFloating && panel.visible) ? blobGroup : null
+            visible: !bar.isFloating && panel.visible
             deformAmount: panels.popouts.isDetached ? 0.05 : panels.popouts.hasCurrent ? 0.15 : 0.1
 
             x: geometry.x - (barLeft ? panels.popoutsWrapper.width * extraScale : 0)
@@ -297,7 +323,7 @@ StyledWindow {
             dashboard.transform: Matrix4x4 {
                 id: dashTransform
 
-                matrix: dashBg.deformMatrix
+                matrix: bar.isFloating ? Qt.matrix4x4() : dashBg.deformMatrix
             }
             launcher.transform: Matrix4x4 {
                 id: launchTransform
@@ -322,7 +348,7 @@ StyledWindow {
             notifications.transform: Matrix4x4 {
                 id: notifsTransform
 
-                matrix: notifsBg.deformMatrix
+                matrix: bar.isFloating ? Qt.matrix4x4() : notifsBg.deformMatrix
             }
             utilities.transform: Matrix4x4 {
                 id: utilsTransform
@@ -330,7 +356,7 @@ StyledWindow {
                 matrix: utilsBg.deformMatrix
             }
             popouts.transform: Matrix4x4 {
-                matrix: popoutBg.deformMatrix
+                matrix: bar.isFloating ? Qt.matrix4x4() : popoutBg.deformMatrix
             }
         }
 
@@ -338,8 +364,8 @@ StyledWindow {
             id: bar
 
             // Direct coordinates avoid opposing anchors constraining a live position switch.
-            x: BarPosition.isRight(position) ? parent.width - width : 0
-            y: BarPosition.isBottom(position) ? parent.height - height : 0
+            x: isFloating && isHorizontal ? floatMarginH : (BarPosition.isRight(position) ? parent.width - width : 0)
+            y: isFloating && isHorizontal ? (BarPosition.isBottom(position) ? parent.height - height - floatMarginV : floatMarginV) : (BarPosition.isBottom(position) ? parent.height - height : 0)
             screen: root.screen
             screenState: root.screenState
             popouts: panels.popouts
@@ -379,6 +405,7 @@ StyledWindow {
         property real deformAmount: 0.15
 
         group: blobGroup
+        visible: panel.visible
         x: geometry.x
         y: geometry.y
         implicitWidth: panel.width

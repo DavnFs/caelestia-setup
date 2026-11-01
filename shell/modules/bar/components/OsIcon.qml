@@ -5,14 +5,25 @@ import qs.components.effects
 import qs.services
 import qs.utils
 
-Item {
+StyledRect {
     id: root
 
-    implicitWidth: Math.round(Tokens.font.body.large.pointSize * 1.2)
-    implicitHeight: Math.round(Tokens.font.body.large.pointSize * 1.2)
+    implicitWidth: Tokens.sizes.bar.innerWidth
+    implicitHeight: Tokens.sizes.bar.innerWidth
 
-    MouseArea {
+    color: stateLayer.containsMouse ? Colours.tPalette.m3surfaceContainerHigh : "transparent"
+    radius: Tokens.rounding.full
+    border.width: 0
+
+    Behavior on color {
+        CAnim {}
+    }
+
+    StateLayer {
+        id: stateLayer
         anchors.fill: parent
+        radius: Tokens.rounding.full
+        color: Colours.palette.m3tertiary
         cursorShape: Qt.PointingHandCursor
         onClicked: {
             const screenState = ShellState.forActive();
@@ -30,8 +41,8 @@ Item {
         id: caelestiaLogo
 
         Logo {
-            implicitWidth: Math.round(Tokens.font.body.large.pointSize * 1.6)
-            implicitHeight: Math.round(Tokens.font.body.large.pointSize * 1.6)
+            implicitWidth: Math.round(Tokens.font.body.large.pointSize * 1.3)
+            implicitHeight: Math.round(Tokens.font.body.large.pointSize * 1.3)
         }
     }
 

@@ -21,10 +21,12 @@ Region {
 
     readonly property real clampedThickness: win.contentItem.Config.border.clampedThickness
 
+    readonly property real barHeightZone: bar.isFloating ? bar.clampedHeight + bar.floatMarginV : bar.clampedHeight
+
     x: (barOnLeft ? bar.clampedWidth : clampedThickness) + win.dragMaskPadding
-    y: (barOnTop ? bar.clampedHeight : clampedThickness) + win.dragMaskPadding
+    y: (barOnTop ? barHeightZone : clampedThickness) + win.dragMaskPadding
     width: win.width - (barOnLeft || barOnRight ? bar.clampedWidth : clampedThickness) - clampedThickness - win.dragMaskPadding * 2
-    height: win.height - (barOnTop || barOnBottom ? bar.clampedHeight : clampedThickness) - clampedThickness - win.dragMaskPadding * 2
+    height: win.height - (barOnTop || barOnBottom ? barHeightZone : clampedThickness) - clampedThickness - win.dragMaskPadding * 2
     intersection: Intersection.Xor
 
     R {
@@ -57,6 +59,10 @@ Region {
 
     R {
         bounds: root.panels.popoutsRect
+    }
+
+    R {
+        bounds: root.panels.toastsRect
     }
 
     component R: Region {

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Keeps the CPU power limit in line with the power-profiles-daemon profile (Ryzen 5 PRO 5650U):
+#   power-saver 7 W, balanced 15 W, performance 25 W (the chip's maximum configurable TDP).
+# Re-applies every few seconds because laptop firmware resets the limits (e.g. after suspend).
+# Needs root and ryzenadj. Pass --once to apply a single time (for testing).
+set -u
+
+watts_for() {
+    case "$1" in
+    power-saver) echo 7 ;;
+    performance) echo 25 ;;
+    *) echo 15 ;;
+    esac
+}
+
+last=""
+while true; do
+    profile=$(powerprofilesctl get 2>/dev/null || echo balanced)
+    mw=$(($(watts_for "$profile") * 1000))
+    # stapm = sustained, slow = average, fast = short boost; all equal so the cap is a real cap
+    if ryzenadj --stapm-limit="$mw" --slow-limit="$mw" --fast-limit="$mw" >/dev/null 2>&1; then
+        [ "$profile" != "$last" ] && echo "$profile: limited to $((mw / 1000)) W"
+    else
+        echo "ryzenadj failed for $profile" >&2
+    fi
+    last=$profile
+    [ "${1:-}" = "--once" ] && exit 0
+    sleep 5
+done

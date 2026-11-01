@@ -19,7 +19,7 @@ GridLayout {
     required property bool fullscreen
     required property bool isHorizontal
     required property rect dashboardHitRect
-    readonly property int axisPadding: Tokens.padding.large
+    readonly property int axisPadding: Tokens.padding.medium
     readonly property int entryCount: repeater.count
     readonly property var enabledEntries: Config.bar.entries.values.filter(e => e.enabled)
     readonly property int firstSpacerIndex: enabledEntries.findIndex(e => e.id === "spacer")
@@ -83,15 +83,15 @@ GridLayout {
 
     function activeWindowCenter(item: Item): real {
         if (!isHorizontal)
-            return item.mapToItem(root, 0, item.implicitHeight / 2).y;
+            return item.mapToItem(null, 0, item.implicitHeight / 2).y;
         if (dashboardHitRect.width <= 0)
-            return item.mapToItem(root, item.width / 2, 0).x;
+            return item.mapToItem(null, item.width / 2, 0).x;
         const start = item.mapToItem(null, 0, 0).x;
         const leftWidth = Math.max(0, Math.min(item.width, dashboardHitRect.x - start));
         const rightWidth = Math.max(0, Math.min(item.width, start + item.width - dashboardHitRect.x - dashboardHitRect.width));
         // Anchor to an owned interval even when the dashboard splits the title.
         const center = leftWidth >= rightWidth ? leftWidth / 2 : item.width - rightWidth / 2;
-        return item.mapToItem(root, center, 0).x;
+        return item.mapToItem(null, center, 0).x;
     }
 
     function hasNonTitleEntryAt(along: real): bool {
@@ -118,9 +118,9 @@ GridLayout {
 
             if (icon?.present) {
                 popouts.currentName = icon.name;
-                popouts.currentCenter = Qt.binding(() => isHorizontal ? icon.mapToItem(root, icon.implicitWidth / 2, 0).x : icon.mapToItem(root, 0, icon.implicitHeight / 2).y);
+                popouts.currentCenter = Qt.binding(() => isHorizontal ? icon.mapToItem(null, icon.implicitWidth / 2, 0).x : icon.mapToItem(null, 0, icon.implicitHeight / 2).y);
                 popouts.hasCurrent = Config.bar.popouts.statusIcons;
-            } else {
+            } else if (!popouts.hasCurrent) {
                 popouts.hasCurrent = false;
             }
         } else if (id === "tray") {
@@ -131,9 +131,9 @@ GridLayout {
 
             if (item?.modelData) {
                 popouts.currentName = `traymenu${item.index}`;
-                popouts.currentCenter = Qt.binding(() => isHorizontal ? item.mapToItem(root, item.width / 2, 0).x : item.mapToItem(root, 0, item.height / 2).y);
+                popouts.currentCenter = Qt.binding(() => isHorizontal ? item.mapToItem(null, item.width / 2, 0).x : item.mapToItem(null, 0, item.height / 2).y);
                 popouts.hasCurrent = Config.bar.popouts.tray;
-            } else {
+            } else if (!popouts.hasCurrent) {
                 popouts.hasCurrent = false;
             }
         } else if (id === "activeWindow") {
@@ -150,7 +150,7 @@ GridLayout {
         } else {
             const item = ch.item as Item;
             popouts.currentName = id.toLowerCase();
-            popouts.currentCenter = isHorizontal ? (item ? item.mapToItem(root, item.implicitWidth / 2, 0).x : 0) : (item ? item.mapToItem(root, 0, item.implicitHeight / 2).y : 0);
+            popouts.currentCenter = isHorizontal ? (item ? item.mapToItem(null, item.implicitWidth / 2, 0).x : 0) : (item ? item.mapToItem(null, 0, item.implicitHeight / 2).y : 0);
             popouts.hasCurrent = Config.bar.popouts[id] ?? false;
         }
     }

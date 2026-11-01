@@ -45,10 +45,37 @@ Item {
     readonly property rect launcherRect: exposedRect(launcher)
     readonly property rect utilitiesRect: exposedRect(utilities)
     readonly property rect sidebarRect: exposedRect(sidebar)
-    readonly property rect popoutsRect: exposedRect(popoutsWrapper)
+    readonly property rect popoutsRect: {
+        if (!popoutsWrapper.visible || !popouts.hasCurrent)
+            return Qt.rect(0, 0, 0, 0);
+
+        const w = popoutsWrapper.content.nonAnimWidth || popoutsWrapper.width;
+        const h = popoutsWrapper.content.nonAnimHeight || popoutsWrapper.height;
+        const geom = panelGeometry(popoutsWrapper);
+        const gx = geom.x;
+        const gy = geom.y;
+
+        if (bar.isFloating) {
+            if (barOnTop) {
+                const bridgeTop = bar.y + bar.clampedHeight;
+                return Qt.rect(gx, bridgeTop, w, (gy - bridgeTop) + h);
+            } else if (barOnBottom) {
+                const bridgeBottom = bar.y;
+                return Qt.rect(gx, gy, w, bridgeBottom - gy);
+            } else if (barOnLeft) {
+                const bridgeLeft = bar.x + bar.clampedWidth;
+                return Qt.rect(bridgeLeft, gy, (gx - bridgeLeft) + w, h);
+            } else if (barOnRight) {
+                const bridgeRight = bar.x;
+                return Qt.rect(gx, gy, bridgeRight - gx, h);
+            }
+        }
+        return exposedRect(popoutsWrapper);
+    }
     readonly property rect osdRect: exposedRect(osd)
     readonly property rect sessionRect: exposedRect(session)
     readonly property rect notificationsRect: exposedRect(notifications)
+    readonly property rect toastsRect: exposedRect(toasts)
 
     // One window-coordinate ownership region for the top-bar title and dashboard.
     // Keep it through the full bar depth and any currently exposed dashboard body.
@@ -170,29 +197,33 @@ Item {
     Item {
         id: osdWrapper
 
-        readonly property real sideOffset: sessionWrapper.sideOffset + session.width * (1 - session.offsetScale)
+        readonly property real sideOffset: sessionWrapper.sideOffset + (session.width + (bar.isFloating ? 10 : 0)) * (1 - session.offsetScale)
+        readonly property int floatMargin: bar.isFloating ? 10 : 0
 
         anchors.verticalCenter: parent.verticalCenter
-        x: root.barOnRight ? sideOffset : parent.width - width - sideOffset
-        clip: sidebar.visible || session.visible
+        x: root.barOnRight ? (floatMargin + sideOffset) : (parent.width - width - floatMargin - sideOffset)
+        clip: false
 
-        implicitWidth: osd.implicitWidth * (1 - osd.offsetScale)
+        implicitWidth: osd.implicitWidth
         implicitHeight: osd.implicitHeight
 
         Osd.Wrapper {
             id: osd
 
+            bar: root.bar
             screen: root.screen
             screenState: root.screenState
             sidebarOrSessionVisible: sidebar.visible || session.visible
 
             anchors.verticalCenter: parent.verticalCenter
-            x: root.barOnRight ? slideOffset : parent.width - width - slideOffset
+            x: root.barOnRight ? -slideOffset : slideOffset
         }
     }
 
     Notifications.Wrapper {
         id: notifications
+
+        readonly property bool isFloating: bar.isFloating
 
         screenState: root.screenState
         sidebarPanel: sidebar
@@ -203,18 +234,19 @@ Item {
         mirrored: root.barOnRight
 
         anchors.top: root.barOnBottom ? utilities.bottom : parent.top
-        anchors.topMargin: -5
-        x: root.barOnRight ? 0 : parent.width - width
+        anchors.topMargin: isFloating ? (root.barOnTop ? bar.floatMarginV + 10 : 10) : -5
+        x: root.barOnRight ? (isFloating ? 10 : 0) : parent.width - width - (isFloating ? 10 : 0)
     }
 
     Item {
         id: sessionWrapper
 
-        readonly property real sideOffset: sidebar.width * (1 - sidebar.offsetScale)
+        readonly property real sideOffset: (sidebar.width + (bar.isFloating ? 10 : 0)) * (1 - sidebar.offsetScale)
+        readonly property int floatMargin: bar.isFloating ? 10 : 0
 
         anchors.verticalCenter: parent.verticalCenter
-        x: root.barOnRight ? sideOffset : parent.width - width - sideOffset
-        clip: sidebar.visible
+        x: root.barOnRight ? (floatMargin + sideOffset) : (parent.width - width - floatMargin - sideOffset)
+        clip: false
 
         implicitWidth: session.implicitWidth * (1 - session.offsetScale)
         implicitHeight: session.implicitHeight
@@ -222,6 +254,7 @@ Item {
         Session.Wrapper {
             id: session
 
+            bar: root.bar
             screenState: root.screenState
             sidebarVisible: sidebar.visible
             mirrored: root.barOnRight
@@ -234,6 +267,7 @@ Item {
     Launcher.Wrapper {
         id: launcher
 
+        bar: root.bar
         screenState: root.screenState
         panels: root
 
@@ -251,6 +285,7 @@ Item {
     Dashboard.Wrapper {
         id: dashboard
 
+        bar: root.bar
         screenState: root.screenState
 
         onShouldBeActiveChanged: {
@@ -270,6 +305,7 @@ Item {
         screen: root.screen
         borderThickness: root.borderThickness
         position: root.barPos
+        bar: root.bar
     }
 
     Utilities.Wrapper {
@@ -288,29 +324,53 @@ Item {
         }
 
         onTop: root.barOnBottom
+        readonly property int floatMargin: bar.isFloating ? 10 : 0
         // Switching opposing anchors can leave a stretched explicit height after a live edge change.
         height: implicitHeight
-        y: onTop ? slideOffset : parent.height - height - slideOffset
-        x: root.barOnRight ? 0 : parent.width - width
+        y: onTop ? (slideOffset + floatMargin) : (parent.height - height - slideOffset - floatMargin)
+        x: root.barOnRight ? floatMargin : (parent.width - width - floatMargin)
     }
 
     Toasts.Toasts {
         id: toasts
 
-        anchors.bottom: root.barOnBottom || sidebar.visible ? parent.bottom : utilities.top
-        x: root.barOnRight ? sidebar.x + sidebar.width + anchors.margins : sidebar.x - width - anchors.margins
-        anchors.margins: Tokens.padding.medium
+        readonly property int floatMargin: bar.isFloating ? 10 : 0
+        readonly property real sidebarOffset: sidebar.visible ? (sidebar.width + floatMargin) : 0
+
+        width: implicitWidth
+        height: implicitHeight
+
+        anchors.bottom: utilities.visible ? utilities.top : parent.bottom
+        anchors.bottomMargin: floatMargin + (root.barOnBottom ? (bar.clampedHeight + bar.floatMarginV) : 0)
+        anchors.right: root.barOnRight ? undefined : parent.right
+        anchors.left: root.barOnRight ? parent.left : undefined
+        anchors.rightMargin: floatMargin + sidebarOffset
+        anchors.leftMargin: floatMargin + sidebarOffset
+
+        Behavior on anchors.rightMargin {
+            Anim {}
+        }
+        Behavior on anchors.leftMargin {
+            Anim {}
+        }
+        Behavior on anchors.bottomMargin {
+            Anim {}
+        }
     }
 
     Sidebar.Wrapper {
         id: sidebar
 
+        bar: root.bar
         screenState: root.screenState
         mirrored: root.barOnRight
 
+        readonly property int floatMargin: bar.isFloating ? 10 : 0
+
         anchors.top: notifications.bottom
         anchors.bottom: root.barOnBottom ? parent.bottom : utilities.top
-        x: root.barOnRight ? slideOffset : parent.width - width - slideOffset
-        anchors.topMargin: root.barOnBottom ? Math.min(-notifications.anchors.topMargin, parent.height - notifications.y - notifications.height) : -notifications.anchors.topMargin
+        anchors.topMargin: bar.isFloating ? 10 : (root.barOnBottom ? Math.min(-notifications.anchors.topMargin, parent.height - notifications.y - notifications.height) : -notifications.anchors.topMargin)
+        anchors.bottomMargin: floatMargin
+        x: root.barOnRight ? (floatMargin - slideOffset) : (parent.width - width - floatMargin + slideOffset)
     }
 }

@@ -19,8 +19,8 @@ StyledRect {
 
     implicitHeight: layout.implicitHeight + layout.anchors.margins * 2
 
-    radius: Tokens.rounding.large
-    color: Colours.tPalette.m3surfaceContainer
+    radius: Tokens.rounding.extraLarge
+    color: Colours.tPalette.m3surfaceContainerLow
 
     Ref {
         service: Recorder
@@ -30,8 +30,8 @@ StyledRect {
         id: layout
 
         anchors.fill: parent
-        anchors.margins: Tokens.padding.large
-        spacing: Tokens.spacing.medium
+        anchors.margins: Tokens.padding.small
+        spacing: Tokens.spacing.small
 
         RowLayout {
             id: btnLayout

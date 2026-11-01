@@ -7,12 +7,14 @@ import qs.components
 Item {
     id: root
 
+    property var bar: null
     required property ScreenState screenState
     required property bool sidebarVisible
     readonly property real nonAnimWidth: content.implicitWidth
 
     required property bool mirrored
-    readonly property real slideOffset: (-implicitWidth - 5 - sidebarOffset) * offsetScale
+    readonly property int floatMargin: bar?.isFloating ? 10 : 0
+    readonly property real slideOffset: (-implicitWidth - floatMargin - 20 - sidebarOffset) * offsetScale
     readonly property bool shouldBeActive: screenState.session && Config.session.enabled
     property real offsetScale: shouldBeActive ? 0 : 1
     property real sidebarOffset: sidebarVisible ? 14 : 0
@@ -20,7 +22,8 @@ Item {
     visible: offsetScale < 1
 
     implicitWidth: content.implicitWidth
-    implicitHeight: content.implicitHeight || 510 // Hard coded fallback for first open
+    implicitHeight: content.implicitHeight || 420
+    scale: 1 - 0.04 * offsetScale
     opacity: 1 - offsetScale
 
     Behavior on offsetScale {

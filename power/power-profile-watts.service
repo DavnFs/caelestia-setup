@@ -1,0 +1,12 @@
+[Unit]
+Description=Match the CPU power limit to the power profile (7 / 15 / 25 W)
+# No ordering on power-profiles-daemon: it starts after multi-user.target, so ordering on it creates a boot cycle.
+# The script falls back to 15 W until the daemon answers.
+
+[Service]
+ExecStart=/usr/local/bin/power-profile-watts
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

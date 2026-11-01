@@ -356,6 +356,12 @@ ColumnLayout {
             }
         }
 
+        function onConnectionFailed(ssid: string): void {
+            if (root.connectingToSsid === ssid) {
+                root.connectingToSsid = "";
+            }
+        }
+
         function onScanningChanged(): void {
             if (!Nmcli.scanning)
                 scanIcon.rotation = 0;

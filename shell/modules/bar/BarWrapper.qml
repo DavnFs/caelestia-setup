@@ -1,9 +1,11 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Caelestia.Config
 import qs.components
+import qs.services
 import qs.utils
 import qs.modules.bar.popouts as BarPopouts
 
@@ -19,17 +21,20 @@ Item {
     readonly property bool disabled: Strings.testRegexList(Config.bar.excludedScreens, screen.name)
     readonly property string position: BarPosition.resolvedPosition(Config.bar.position)
     readonly property bool isHorizontal: BarPosition.isHorizontal(position)
+    readonly property bool isFloating: Config.bar?.floating ?? true
+    readonly property int floatMarginH: 10
+    readonly property int floatMarginV: 10
 
     readonly property int padding: Math.max(Tokens.padding.small, Config.border.thickness)
     readonly property int thickness: Tokens.sizes.bar.innerWidth + padding * 2
 
-    readonly property int contentWidth: isHorizontal ? screen.width : thickness
+    readonly property int contentWidth: isHorizontal ? (isFloating ? screen.width - floatMarginH * 2 : screen.width) : thickness
     readonly property int contentHeight: isHorizontal ? thickness : screen.height
 
-    readonly property int clampedWidth: isHorizontal ? screen.width : Math.max(Config.border.minThickness, implicitWidth)
+    readonly property int clampedWidth: isHorizontal ? contentWidth : Math.max(Config.border.minThickness, implicitWidth)
     readonly property int clampedHeight: isHorizontal ? Math.max(Config.border.minThickness, implicitHeight) : screen.height
 
-    readonly property int exclusiveZone: !disabled && (Config.bar.persistent || screenState.bar) ? thickness : Config.border.thickness
+    readonly property int exclusiveZone: !disabled && (Config.bar.persistent || screenState.bar) ? (isFloating && isHorizontal ? thickness + floatMarginV : thickness) : Config.border.thickness
     readonly property bool shouldBeVisible: !fullscreen && !disabled && (Config.bar.persistent || screenState.bar || isHovered)
     property bool isHovered
     readonly property Item contentItem: (isHorizontal ? horizontalContent.item : verticalContent.item) as Item
@@ -39,24 +44,24 @@ Item {
     }
 
     function hasNonTitleEntryAt(along: real): bool {
-        return (contentItem as Bar)?.hasNonTitleEntryAt(along) ?? false;
+        return (contentItem as Bar)?.hasNonTitleEntryAt(along - (isHorizontal && isFloating ? floatMarginH : 0)) ?? false;
     }
 
     function checkPopout(along: real): void {
-        (contentItem as Bar)?.checkPopout(along);
+        (contentItem as Bar)?.checkPopout(along - (isHorizontal && isFloating ? floatMarginH : 0));
     }
 
     function handleWheel(along: real, angleDelta: point): void {
-        (contentItem as Bar)?.handleWheel(along, angleDelta);
+        (contentItem as Bar)?.handleWheel(along - (isHorizontal && isFloating ? floatMarginH : 0), angleDelta);
     }
 
-    clip: true
+    clip: !isFloating
     visible: (isHorizontal ? height : width) > Config.border.thickness
 
-    width: isHorizontal ? screen.width : implicitWidth
+    width: isHorizontal ? contentWidth : implicitWidth
     height: isHorizontal ? implicitHeight : screen.height
 
-    implicitWidth: fullscreen ? 0 : (isHorizontal ? screen.width : Config.border.thickness)
+    implicitWidth: fullscreen ? 0 : (isHorizontal ? contentWidth : Config.border.thickness)
     implicitHeight: fullscreen ? 0 : (isHorizontal ? Config.border.thickness : screen.height)
 
     onIsHorizontalChanged: {
@@ -69,8 +74,8 @@ Item {
         when: root.shouldBeVisible
 
         PropertyChanges {
-            root.implicitWidth: root.isHorizontal ? root.screen.width : root.contentWidth
-            root.implicitHeight: root.isHorizontal ? root.contentHeight : root.screen.height
+            root.implicitWidth: root.contentWidth
+            root.implicitHeight: root.contentHeight
         }
     }
 
@@ -95,6 +100,25 @@ Item {
             }
         }
     ]
+
+    StyledRect {
+        id: barBg
+
+        anchors.fill: parent
+        radius: 15
+        color: Colours.palette.m3surfaceContainer
+        border.color: Colours.palette.m3outlineVariant
+        border.width: 1
+        visible: root.isFloating && root.shouldBeVisible
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            blurMax: 12
+            shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.4)
+            shadowVerticalOffset: 2
+        }
+    }
 
     // Keep separate layout instances so an axis switch starts with fresh geometry.
     Loader {

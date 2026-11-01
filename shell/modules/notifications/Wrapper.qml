@@ -13,14 +13,12 @@ Item {
     property alias utilitiesPanel: content.utilitiesPanel
 
     visible: height > 0
-    anchors.topMargin: -5
-    implicitWidth: Math.max(sidebarPanel.width, content.implicitWidth)
+    implicitWidth: Math.max(sidebarPanel.visible ? sidebarPanel.width : 0, content.implicitWidth)
     implicitHeight: content.implicitHeight
 
     Content {
         id: content
 
-        anchors.topMargin: -root.anchors.topMargin
         screenState: root.screenState
         availableHeight: Math.max(0, root.parent.height - (root.utilitiesOnTop ? Math.max(0, root.utilitiesPanel.y + root.utilitiesPanel.height) : 0))
         utilitiesOnTop: root.utilitiesOnTop

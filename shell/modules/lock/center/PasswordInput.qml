@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import M3Shapes
+import QtQuick.Effects
 import Caelestia.Config
 import qs.components
 import qs.components.controls
@@ -21,8 +21,18 @@ StyledRect {
     }
     implicitHeight: input.implicitHeight + Tokens.padding.small
 
-    color: Colours.tPalette.m3surfaceContainer
-    radius: Tokens.rounding.full
+    color: Colours.palette.m3surfaceContainer
+    radius: Tokens.rounding.large
+    border.width: 1
+    border.color: Colours.palette.m3outlineVariant
+
+    layer.enabled: true
+    layer.effect: MultiEffect {
+        shadowEnabled: true
+        blurMax: 16
+        shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.4)
+        shadowVerticalOffset: 3
+    }
 
     focus: true
     onActiveFocusChanged: {
@@ -130,41 +140,35 @@ StyledRect {
             pam: root.lock.pam
         }
 
-        Item {
+        StyledRect {
             id: enterButton
 
-            implicitWidth: implicitHeight
-            implicitHeight: {
-                const h = enterIcon.implicitHeight + Tokens.padding.extraSmall * 2;
-                return h % 2 === 0 ? h : h + 1;
+            implicitWidth: 32 * root.centerScale
+            implicitHeight: 32 * root.centerScale
+            radius: Tokens.rounding.medium
+            color: root.lock.pam.buffer ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3surfaceContainerHighest, 0.5)
+            border.width: 1
+            border.color: root.lock.pam.buffer ? Colours.palette.m3primary : Colours.palette.m3outlineVariant
+
+            scale: mouse.pressed ? 0.92 : (mouse.containsMouse && root.lock.pam.buffer) ? 1.05 : 1.0
+
+            Behavior on scale {
+                Anim {
+                    type: Anim.FastSpatial
+                }
             }
 
-            MaterialShape {
+            Behavior on color {
+                CAnim {}
+            }
+
+            MouseArea {
+                id: mouse
+
                 anchors.fill: parent
-
-                color: root.lock.pam.buffer ? Colours.palette.m3primary : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
-                shape: root.lock.pam.buffer ? MaterialShape.Arrow : MaterialShape.Circle
-                scale: !root.lock.pam.buffer ? 1 : mouse.pressed ? 0.6 : mouse.containsMouse ? 0.8 : 0.7
-                rotation: 90
-
-                Behavior on scale {
-                    Anim {
-                        type: Anim.FastSpatial
-                    }
-                }
-
-                Behavior on color {
-                    CAnim {}
-                }
-
-                MouseArea {
-                    id: mouse
-
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: root.lock.pam.buffer ? Qt.PointingHandCursor : Qt.ArrowCursor
-                    onClicked: root.lock.pam.buffer && root.lock.pam.passwd.start()
-                }
+                hoverEnabled: true
+                cursorShape: root.lock.pam.buffer ? Qt.PointingHandCursor : Qt.ArrowCursor
+                onClicked: root.lock.pam.buffer && root.lock.pam.passwd.start()
             }
 
             MaterialIcon {
@@ -172,15 +176,8 @@ StyledRect {
 
                 anchors.centerIn: parent
                 text: "arrow_forward"
-                color: Colours.palette.m3onSurfaceVariant
-                fontStyle: Tokens.font.icon.builders.medium.scale(root.centerScale * 1.2).build()
-                opacity: root.lock.pam.buffer ? 0 : 1
-
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
-                }
+                color: root.lock.pam.buffer ? Colours.palette.m3onPrimary : Colours.palette.m3onSurfaceVariant
+                fontStyle: Tokens.font.icon.builders.small.scale(root.centerScale).build()
             }
         }
     }

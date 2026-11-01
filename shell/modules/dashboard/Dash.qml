@@ -11,6 +11,8 @@ GridLayout {
     required property ScreenState screenState
     required property FileDialog facePicker
 
+    implicitWidth: 860
+
     rowSpacing: Tokens.spacing.medium
     columnSpacing: Tokens.spacing.medium
 
@@ -19,8 +21,6 @@ GridLayout {
         Layout.columnSpan: 3
         Layout.preferredWidth: Tokens.sizes.dashboard.userWidth
         Layout.fillHeight: true
-
-        radius: Tokens.rounding.extraLarge
 
         User {
             id: user
@@ -36,8 +36,6 @@ GridLayout {
         Layout.preferredWidth: Tokens.sizes.dashboard.weatherWidth
         Layout.preferredHeight: weather.implicitHeight
 
-        radius: Tokens.rounding.extraLarge * 1.5
-
         SmallWeather {
             id: weather
         }
@@ -47,8 +45,6 @@ GridLayout {
         Layout.row: 1
         Layout.preferredWidth: dateTime.implicitWidth
         Layout.fillHeight: true
-
-        radius: Tokens.rounding.large
 
         DateTime {
             id: dateTime
@@ -61,8 +57,6 @@ GridLayout {
         Layout.columnSpan: 3
         Layout.fillWidth: true
         Layout.preferredHeight: calendar.implicitHeight
-
-        radius: Tokens.rounding.extraLarge
 
         Calendar {
             id: calendar
@@ -77,8 +71,6 @@ GridLayout {
         Layout.preferredWidth: resources.implicitWidth
         Layout.fillHeight: true
 
-        radius: Tokens.rounding.large
-
         Resources {
             id: resources
         }
@@ -91,14 +83,13 @@ GridLayout {
         Layout.preferredWidth: media.implicitWidth
         Layout.fillHeight: true
 
-        radius: Tokens.rounding.extraLarge * 2
-
         Media {
             id: media
         }
     }
 
     component Rect: StyledRect {
-        color: Colours.tPalette.m3surfaceContainer
+        color: Colours.palette.m3surfaceContainer
+        radius: Tokens.rounding.extraLarge
     }
 }

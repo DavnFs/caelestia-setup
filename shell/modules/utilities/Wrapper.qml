@@ -78,8 +78,9 @@ Item {
 
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.margins: Tokens.padding.large
-        anchors.leftMargin: root.mirrored ? root.totalPadding - anchors.margins : anchors.margins
+        anchors.right: parent.right
+        anchors.margins: 0
+        anchors.leftMargin: root.mirrored ? root.totalPadding : 0
 
         asynchronous: true
         active: root.shouldBeActive || root.visible

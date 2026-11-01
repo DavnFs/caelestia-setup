@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
@@ -21,6 +22,25 @@ Item {
 
     implicitWidth: listWrapper.width + padding * 2
     implicitHeight: search.height + listWrapper.height + padding + search.anchors.bottomMargin
+
+    StyledRect {
+        id: bg
+
+        anchors.fill: parent
+        radius: Tokens.rounding.large
+        color: Colours.palette.m3surfaceContainerLow
+        border.color: Colours.palette.m3outlineVariant
+        border.width: 1
+
+        layer.enabled: true
+        layer.smooth: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            blurMax: 12
+            shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.5)
+            shadowVerticalOffset: 3
+        }
+    }
 
     Item {
         id: listWrapper

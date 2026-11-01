@@ -13,6 +13,7 @@ Scope {
         Players;
         Brightness;
         Weather.reload();
+        LoginSettings;
 
         if (GlobalConfig.utilities.vpn.enabled)
             VPN;

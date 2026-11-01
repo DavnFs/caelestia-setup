@@ -21,8 +21,9 @@ Item {
     required property Item osdPanel
     required property Item sessionPanel
     required property Item utilitiesPanel
-    readonly property int padding: Tokens.padding.large
-    readonly property int clampedPadding: CUtils.clamp(padding - Config.border.thickness, 0, padding)
+    readonly property bool isFloating: Config.bar?.floating ?? true
+    readonly property int padding: isFloating ? 0 : Tokens.padding.large
+    readonly property int clampedPadding: isFloating ? 0 : CUtils.clamp(padding - Config.border.thickness, 0, padding)
 
     // Only content changes invalidate the delegate-height sum.
     readonly property real naturalHeight: {
@@ -69,21 +70,18 @@ Item {
     anchors.left: mirrored ? parent.left : undefined
     anchors.right: mirrored ? undefined : parent.right
 
-    clip: true
+    clip: !isFloating
     implicitWidth: Tokens.sizes.notifs.width
     // The moving viewport must constrain every animation frame, not just its target.
     implicitHeight: Math.max(0, Math.min(desiredHeight, maximumHeight))
 
-    ClippingWrapperRectangle {
+    Item {
         anchors.fill: parent
         anchors.margins: root.padding
         anchors.topMargin: Math.min(root.clampedPadding, root.height)
         anchors.bottomMargin: Math.min(root.padding, Math.max(0, root.height - anchors.topMargin))
         anchors.leftMargin: root.mirrored ? root.clampedPadding : root.padding
         anchors.rightMargin: root.mirrored ? root.padding : root.clampedPadding
-
-        color: "transparent"
-        radius: Tokens.rounding.large
 
         StyledListView {
             id: list
@@ -194,12 +192,21 @@ Item {
                 property: "z"
                 value: 1
             }
-            Anim {
-                target: notif
-                property: "x"
-                to: (notif.x >= 0 ? root.implicitWidth : -root.implicitWidth) * 2
-                duration: Tokens.anim.durations.normal
-                easing: Tokens.anim.emphasized
+            ParallelAnimation {
+                Anim {
+                    target: notif
+                    property: "x"
+                    to: (notif.x >= 0 ? root.implicitWidth : -root.implicitWidth) * 1.5
+                    duration: Tokens.anim.durations.normal
+                    easing: Tokens.anim.emphasized
+                }
+                NumberAnimation {
+                    target: notif
+                    property: "opacity"
+                    to: 0
+                    duration: Tokens.anim.durations.normal
+                    easing: Tokens.anim.emphasized
+                }
             }
             PropertyAction {
                 target: wrapper
@@ -208,12 +215,10 @@ Item {
             }
         }
 
-        ClippingRectangle {
+        Item {
             anchors.top: parent.top
             anchors.topMargin: wrapper.idx === 0 ? 0 : Tokens.spacing.medium
 
-            color: "transparent"
-            radius: notif.radius
             implicitWidth: notif.implicitWidth
             implicitHeight: notif.implicitHeight
 

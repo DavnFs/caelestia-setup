@@ -57,7 +57,7 @@ StyledRect {
     implicitHeight: nonAnimHeight
 
     clip: true
-    radius: Tokens.rounding.large
+    radius: Tokens.rounding.extraLarge
     color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
 
     Behavior on implicitHeight {

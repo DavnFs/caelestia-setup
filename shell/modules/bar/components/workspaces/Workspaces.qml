@@ -54,8 +54,9 @@ StyledClippingRect {
     implicitWidth: isHorizontal ? Math.max(0, Math.min(maxWidth, contentWidth)) : Tokens.sizes.bar.innerWidth
     implicitHeight: isHorizontal ? Tokens.sizes.bar.innerWidth : view.implicitHeight + Tokens.padding.extraSmall * 2
 
-    color: Colours.tPalette.m3surfaceContainer
-    radius: Tokens.rounding.full
+    color: "transparent"
+    radius: Tokens.rounding.medium
+    border.width: 0
 
     Item {
         anchors.fill: parent

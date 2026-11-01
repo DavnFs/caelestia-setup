@@ -18,8 +18,11 @@ Item {
 
     // Needs pam, screen and unlocking (the lock surface, or a stand-in for previews)
     required property var lock
-    readonly property real s: Math.min(1, (lock.screen?.height ?? 1080) / 1080)
-    readonly property color fg: "white"
+    readonly property real s: Math.max(0.6, (lock.screen?.height ?? 1080) / 1080)
+    readonly property color fg: Colours.palette.m3onSurface
+    readonly property color clockPrimary: Colours.light ? Colours.palette.m3primaryFixed : Colours.palette.m3primary
+    readonly property color clockSecondary: Colours.light ? Colours.palette.m3secondaryFixed : Colours.palette.m3secondary
+    readonly property color clockTertiary: Colours.light ? Colours.palette.m3tertiaryFixed : Colours.palette.m3tertiary
     readonly property alias background: background
     readonly property alias foreground: foreground
     // Shown while a player has a track loaded (playing or paused)
@@ -99,45 +102,114 @@ Item {
 
         anchors.fill: parent
 
-        // Status in the top-right corner, like the macOS menu bar
-        RowLayout {
+        // Status in the top-right corner, matching floating status bar design
+        StyledRect {
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.margins: Tokens.padding.extraLarge
-            spacing: Tokens.spacing.small
+            anchors.margins: 16
+            radius: Tokens.rounding.large
+            color: Colours.palette.m3surfaceContainer
+            border.width: 1
+            border.color: Colours.palette.m3outlineVariant
+            implicitWidth: batteryLayout.implicitWidth + Tokens.padding.medium * 2
+            implicitHeight: batteryLayout.implicitHeight + Tokens.padding.small * 2
             visible: UPower.displayDevice.isLaptopBattery
 
-            StyledText {
-                text: `${Math.round(UPower.displayDevice.percentage * 100)}%`
-                color: root.fg
-                font: Tokens.font.label.builders.small.weight(Font.Medium).build()
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                blurMax: 12
+                shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.3)
+                shadowVerticalOffset: 2
             }
 
-            MaterialIcon {
-                text: Icons.getBatteryIcon(UPower.displayDevice.percentage, !UPower.onBattery)
-                color: root.fg
-                fill: 1
+            RowLayout {
+                id: batteryLayout
+
+                anchors.centerIn: parent
+                spacing: Tokens.spacing.small
+
+                StyledText {
+                    text: `${Math.round(UPower.displayDevice.percentage * 100)}%`
+                    color: Colours.palette.m3onSurface
+                    font: Tokens.font.label.builders.small.weight(Font.Medium).build()
+                }
+
+                MaterialIcon {
+                    text: Icons.getBatteryIcon(UPower.displayDevice.percentage, !UPower.onBattery)
+                    color: Colours.palette.m3onSurface
+                    fill: 1
+                }
             }
         }
 
         ColumnLayout {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
-            anchors.topMargin: 90 * root.s
-            spacing: 0
+            anchors.topMargin: 80 * root.s
+            spacing: 8 * root.s
 
-            GlassText {
+            StyledText {
                 Layout.alignment: Qt.AlignHCenter
-                text: Time.format("ddd d MMM")
-                font: Tokens.font.title.builders.medium.weight(Font.DemiBold).scale(1.15 * root.s).build()
+                text: Time.format("ddd, d MMM")
+                color: root.clockTertiary
+                font: Tokens.font.title.builders.large.scale(root.s).weight(Font.DemiBold).build()
+
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    shadowEnabled: true
+                    blurMax: 16
+                    shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.5)
+                    shadowVerticalOffset: 2
+                }
             }
 
-            GlassText {
+            RowLayout {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: -Tokens.spacing.small
-                // Qt only gives 12-hour "h" with an AM/PM marker; drop the marker like macOS does
-                text: Units.twelveHourClock ? Time.format("h:mm AP").split(" ")[0] : Time.format("HH:mm")
-                font: Tokens.font.headline.builders.large.scale(4.2 * root.s).weight(Font.DemiBold).build()
+                spacing: 2 * root.s
+
+                StyledText {
+                    text: Units.twelveHourClock ? Time.format("h") : Time.hourStr
+                    color: root.clockPrimary
+                    font: Tokens.font.headline.builders.large.scale(3.4 * root.s).weight(Font.Medium).build()
+
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        shadowEnabled: true
+                        blurMax: 20
+                        shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.5)
+                        shadowVerticalOffset: 3
+                    }
+                }
+
+                StyledText {
+                    text: ":"
+                    color: Qt.alpha(Colours.palette.m3outline, 0.75)
+                    font: Tokens.font.headline.builders.large.scale(3.4 * root.s).weight(Font.Medium).build()
+                    Layout.topMargin: -4 * root.s
+
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        shadowEnabled: true
+                        blurMax: 20
+                        shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.5)
+                        shadowVerticalOffset: 3
+                    }
+                }
+
+                StyledText {
+                    text: Time.minuteStr
+                    color: root.clockSecondary
+                    font: Tokens.font.headline.builders.large.scale(3.4 * root.s).weight(Font.Medium).build()
+
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        shadowEnabled: true
+                        blurMax: 20
+                        shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.5)
+                        shadowVerticalOffset: 3
+                    }
+                }
             }
         }
 
@@ -146,7 +218,6 @@ Item {
             anchors.bottom: passwordArea.top
             anchors.bottomMargin: 40 * root.s
             s: root.s
-            blurSource: background
             visible: opacity > 0
             opacity: root.music && LockSettings.showMedia ? 1 : 0
 
@@ -167,20 +238,6 @@ Item {
             implicitWidth: 420 * root.s
             implicitHeight: passwordInput.implicitHeight + stateMessage.implicitHeight + Tokens.spacing.small
 
-            StyledText {
-                anchors.centerIn: passwordInput
-                text: Tr.tr("Enter Password")
-                color: Qt.rgba(1, 1, 1, 0.75)
-                font: Tokens.font.label.builders.medium.weight(Font.Medium).build()
-                opacity: root.typing ? 0 : 1
-
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
-                }
-            }
-
             PasswordInput {
                 id: passwordInput
 
@@ -189,17 +246,7 @@ Item {
                 centerScale: Math.max(0.8, root.s)
                 centerWidth: 380 * root.s
                 lock: root.lock
-                color: Qt.rgba(1, 1, 1, 0.18)
-                // Fixed like macOS; the built-in width measures the placeholder too narrow
                 implicitWidth: 300 * root.s
-                // Still focused and receiving keys while hidden
-                opacity: root.typing ? 1 : 0
-
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
-                }
             }
 
             StateMessage {
@@ -214,69 +261,5 @@ Item {
         }
     }
 
-    // Frosted-glass text, same recipe as the now-playing card: blurred background behind it, lightly tinted
-    component GlassText: Item {
-        id: glassText
 
-        property alias text: shape.text
-        property alias font: shape.font
-
-        implicitWidth: shape.implicitWidth
-        implicitHeight: shape.implicitHeight
-
-        // The letter shapes, used only as a mask
-        StyledText {
-            id: shape
-
-            anchors.fill: parent
-            color: "white"
-            visible: false
-            layer.enabled: true
-        }
-
-        Item {
-            id: fill
-
-            anchors.fill: parent
-            visible: false
-            layer.enabled: true
-
-            ShaderEffectSource {
-                id: behind
-
-                anchors.fill: parent
-                sourceItem: background
-                sourceRect: {
-                    glassText.x; glassText.y; glassText.width; glassText.height; foreground.scale; // Re-map on layout or intro/outro scale
-                    const p = glassText.mapToItem(background, 0, 0);
-                    return Qt.rect(p.x, p.y, glassText.width, glassText.height);
-                }
-                visible: false
-            }
-
-            MultiEffect {
-                anchors.fill: parent
-                source: behind
-                blurEnabled: true
-                blurMax: 48
-                blur: 1
-                saturation: 0.2
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                color: "white"
-                opacity: 0.55
-            }
-        }
-
-        MultiEffect {
-            anchors.fill: parent
-            source: fill
-            maskEnabled: true
-            maskSource: shape
-            maskThresholdMin: 0.3
-            maskSpreadAtMin: 0.3
-        }
-    }
 }

@@ -5,5 +5,7 @@ set -euo pipefail
 T=/usr/share/sddm/themes/caelestia
 [ -f "$T/Main.qml.orig" ] || cp "$T/Main.qml" "$T/Main.qml.orig"
 install -m 0644 "$(dirname "$(readlink -f "$0")")/Main.qml" "$T/Main.qml"
+# sync.sh finds the user through SUDO_USER; pkexec only sets PKEXEC_UID
+[ -n "${SUDO_USER:-}" ] || export SUDO_USER="$(id -nu "${PKEXEC_UID:?run with sudo or pkexec}")"
 "$T/scripts/sync.sh"
 echo "Done. Undo with: sudo cp $T/Main.qml.orig $T/Main.qml"

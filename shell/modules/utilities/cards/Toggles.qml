@@ -40,17 +40,17 @@ StyledRect {
     readonly property int splitIndex: Math.ceil(quickToggles.length / 2)
     readonly property bool needExtraRow: quickToggles.length > 6
 
-    implicitHeight: layout.implicitHeight + Tokens.padding.extraLargeIncreased
+    implicitHeight: layout.implicitHeight + Tokens.padding.small * 2
 
-    radius: Tokens.rounding.large
-    color: Colours.tPalette.m3surfaceContainer
+    radius: Tokens.rounding.extraLarge
+    color: Colours.tPalette.m3surfaceContainerLow
 
     ColumnLayout {
         id: layout
 
         anchors.fill: parent
-        anchors.margins: Tokens.padding.large
-        spacing: Tokens.spacing.medium
+        anchors.margins: Tokens.padding.small
+        spacing: Tokens.spacing.small
 
         StyledText {
             text: Tr.tr("Quick toggles")

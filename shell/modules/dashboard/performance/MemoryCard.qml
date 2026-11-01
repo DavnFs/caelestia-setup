@@ -13,7 +13,7 @@ StyledRect {
 
     readonly property color accent: Colours.palette.m3tertiary
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.palette.m3surfaceContainer
     radius: Tokens.rounding.medium
 
     implicitWidth: layout.implicitWidth + Tokens.padding.extraLargeIncreased * 2

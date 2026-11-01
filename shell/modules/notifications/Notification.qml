@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Shapes
 import Quickshell
 import Quickshell.Services.Notifications
@@ -22,25 +23,59 @@ StyledRect {
     readonly property int nonAnimHeight: summary.implicitHeight + (root.expanded ? Tokens.spacing.extraSmall * 2 + appName.height + body.height + actions.height + actions.anchors.topMargin : bodyPreview.height) + inner.anchors.margins * 2
     property bool expanded: Config.notifs.openExpanded
 
-    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainer
-    radius: Tokens.rounding.large
+    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainer
+    radius: 15
+    border.color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : (mouseArea.containsMouse ? Colours.palette.m3outline : Colours.palette.m3outlineVariant)
+    border.width: 1
+
+    layer.enabled: true
+    layer.effect: MultiEffect {
+        shadowEnabled: true
+        blurMax: 20
+        shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.5)
+        shadowVerticalOffset: 3
+    }
 
     implicitHeight: inner.implicitHeight
 
-    x: implicitWidth
+    x: 40
+    opacity: 0
+    scale: 0.96
     Component.onCompleted: {
         x = 0;
+        opacity = 1;
+        scale = 1.0;
         modelData.lock(this);
     }
     Component.onDestruction: modelData.unlock(this)
 
     Behavior on x {
         Anim {
+            duration: Tokens.anim.durations.normal
             easing: Tokens.anim.emphasizedDecel
         }
     }
 
+    Behavior on opacity {
+        NumberAnimation {
+            duration: Tokens.anim.durations.normal
+            easing: Tokens.anim.emphasizedDecel
+        }
+    }
+
+    Behavior on scale {
+        NumberAnimation {
+            duration: Tokens.anim.durations.normal
+            easing: Tokens.anim.emphasizedDecel
+        }
+    }
+
+    Behavior on border.color {
+        CAnim {}
+    }
+
     MouseArea {
+        id: mouseArea
         property int startY
 
         anchors.fill: parent

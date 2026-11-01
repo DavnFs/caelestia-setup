@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
 import Caelestia
@@ -9,6 +10,7 @@ import Caelestia.Config
 import Caelestia.I18n
 import qs.components
 import qs.components.filedialog
+import qs.services
 
 Item {
     id: root
@@ -52,11 +54,30 @@ Item {
         return allTabs.filter(tab => tab.enabled);
     }
 
-    readonly property real nonAnimWidth: view.implicitWidth + viewWrapper.anchors.margins * 2
-    readonly property real nonAnimHeight: tabs.implicitHeight + tabs.anchors.topMargin + view.implicitHeight + viewWrapper.anchors.margins * 2
+    readonly property real nonAnimWidth: Math.max(860, view.implicitWidth) + viewWrapper.anchors.margins * 2
+    readonly property real nonAnimHeight: tabs.implicitHeight + tabs.anchors.topMargin + viewWrapper.anchors.topMargin + view.implicitHeight + viewWrapper.anchors.bottomMargin
 
+    width: implicitWidth
+    height: implicitHeight
     implicitWidth: nonAnimWidth
     implicitHeight: nonAnimHeight
+
+    StyledRect {
+        id: bg
+
+        anchors.fill: parent
+        radius: Tokens.rounding.extraLargeIncreased
+        color: Colours.palette.m3surfaceContainerLow
+
+        layer.enabled: true
+        layer.smooth: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            blurMax: 16
+            shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.35)
+            shadowVerticalOffset: 4
+        }
+    }
 
     Tabs {
         id: tabs
@@ -64,7 +85,7 @@ Item {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: CUtils.clamp(anchors.margins - Config.border.thickness, 0, anchors.margins)
+        anchors.topMargin: Tokens.padding.large
         anchors.margins: Tokens.padding.large
 
         nonAnimWidth: root.nonAnimWidth - anchors.margins * 2
@@ -80,8 +101,9 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: Tokens.padding.large
+        anchors.topMargin: Tokens.padding.small
 
-        radius: Tokens.rounding.large
+        radius: Tokens.rounding.extraLarge
         color: "transparent"
 
         Flickable {
@@ -97,7 +119,7 @@ Item {
 
             flickableDirection: Flickable.HorizontalFlick
 
-            implicitWidth: currentItem?.implicitWidth ?? 0
+            implicitWidth: Math.max(860, currentItem?.implicitWidth ?? 0)
             implicitHeight: currentItem?.implicitHeight ?? 0
 
             contentX: currentItem?.x ?? 0
@@ -130,6 +152,7 @@ Item {
 
             RowLayout {
                 id: row
+                spacing: Tokens.spacing.extraLargeIncreased
 
                 Repeater {
                     id: repeater

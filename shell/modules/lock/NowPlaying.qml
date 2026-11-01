@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
@@ -6,13 +8,11 @@ import Caelestia.Config
 import qs.components
 import qs.services
 
-// macOS-style now playing widget: small frosted-glass card with artwork, track info, progress and controls
-Item {
+// Material 3 Now Playing card
+StyledRect {
     id: root
 
     required property real s
-    // What the glass blurs (the lock background)
-    required property Item blurSource
 
     readonly property var player: Players.active
     readonly property real progress: player?.length ? Math.min(1, player.position / player.length) : 0
@@ -22,55 +22,28 @@ Item {
         return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`;
     }
 
-    implicitWidth: 300 * s
+    implicitWidth: 320 * s
     implicitHeight: content.implicitHeight + 28 * s
 
-    // Position is only pushed on demand
+    radius: Tokens.rounding.large
+    color: Colours.palette.m3surfaceContainer
+    border.width: 1
+    border.color: Colours.palette.m3outlineVariant
+
+    layer.enabled: true
+    layer.effect: MultiEffect {
+        shadowEnabled: true
+        blurMax: 16
+        shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.35)
+        shadowVerticalOffset: 2
+    }
+
     Timer {
         running: root.visible && (root.player?.isPlaying ?? false)
         interval: 1000
         repeat: true
         triggeredOnStart: true
         onTriggered: root.player?.positionChanged()
-    }
-
-    // Frosted glass: blurred copy of the background behind the card, plus a light tint and edge
-    ClippingRectangle {
-        id: glass
-
-        anchors.fill: parent
-        radius: 22 * root.s
-        color: "transparent"
-
-        ShaderEffectSource {
-            id: behind
-
-            anchors.fill: parent
-            sourceItem: root.blurSource
-            sourceRect: {
-                root.x; root.y; root.width; root.height; root.parent?.scale; // Re-map on move, resize, or intro/outro scale
-                const p = root.mapToItem(root.blurSource, 0, 0);
-                return Qt.rect(p.x, p.y, root.width, root.height);
-            }
-            visible: false
-        }
-
-        MultiEffect {
-            anchors.fill: parent
-            source: behind
-            blurEnabled: true
-            blurMax: 48
-            blur: 1
-            saturation: 0.2
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            radius: glass.radius
-            color: Qt.rgba(1, 1, 1, 0.14)
-            border.width: 1
-            border.color: Qt.rgba(1, 1, 1, 0.28)
-        }
     }
 
     ColumnLayout {
@@ -83,13 +56,13 @@ Item {
         spacing: 10 * root.s
 
         RowLayout {
-            spacing: 10 * root.s
+            spacing: 12 * root.s
 
             ClippingRectangle {
                 implicitWidth: 52 * root.s
                 implicitHeight: implicitWidth
-                radius: 8 * root.s
-                color: Qt.rgba(1, 1, 1, 0.1)
+                radius: Tokens.rounding.medium
+                color: Colours.palette.m3surfaceContainerHighest
 
                 Image {
                     anchors.fill: parent
@@ -103,28 +76,28 @@ Item {
 
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: 0
+                spacing: 2
 
                 StyledText {
                     Layout.fillWidth: true
                     text: root.player?.trackTitle ?? ""
-                    color: "white"
+                    color: Colours.palette.m3onSurface
                     elide: Text.ElideRight
-                    font: Tokens.font.body.builders.small.weight(Font.DemiBold).build()
+                    font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
                 }
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: (root.player?.trackArtist ?? "").toUpperCase()
-                    color: Qt.rgba(1, 1, 1, 0.65)
+                    text: root.player?.trackArtist ?? ""
+                    color: Colours.palette.m3onSurfaceVariant
                     elide: Text.ElideRight
-                    font: Tokens.font.label.small
+                    font: Tokens.font.body.small
                 }
             }
 
             MaterialIcon {
                 text: "graphic_eq"
-                color: Qt.rgba(1, 1, 1, root.player?.isPlaying ? 0.85 : 0.4)
+                color: root.player?.isPlaying ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
             }
         }
 
@@ -133,7 +106,7 @@ Item {
 
             StyledText {
                 text: root.fmt(root.player?.position ?? 0)
-                color: Qt.rgba(1, 1, 1, 0.65)
+                color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.label.small
             }
 
@@ -144,14 +117,14 @@ Item {
                 Rectangle {
                     anchors.fill: parent
                     radius: height / 2
-                    color: Qt.rgba(1, 1, 1, 0.25)
+                    color: Colours.palette.m3surfaceContainerHighest
                 }
 
                 Rectangle {
                     width: parent.width * root.progress
                     height: parent.height
                     radius: height / 2
-                    color: Qt.rgba(1, 1, 1, 0.9)
+                    color: Colours.palette.m3primary
 
                     Behavior on width {
                         Anim {
@@ -163,30 +136,54 @@ Item {
 
             StyledText {
                 text: root.fmt(root.player?.length ?? 0)
-                color: Qt.rgba(1, 1, 1, 0.65)
+                color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.label.small
             }
         }
 
         RowLayout {
             Layout.alignment: Qt.AlignHCenter
-            spacing: 32 * root.s
+            spacing: 24 * root.s
 
             ControlIcon {
-                icon: "fast_rewind"
+                icon: "skip_previous"
                 enabled: root.player?.canGoPrevious ?? false
                 onClicked: root.player?.previous()
             }
 
-            ControlIcon {
-                icon: root.player?.isPlaying ? "pause" : "play_arrow"
-                size: 1.5
-                enabled: root.player?.canTogglePlaying ?? false
-                onClicked: root.player?.togglePlaying()
+            StyledRect {
+                implicitWidth: 42 * root.s
+                implicitHeight: 42 * root.s
+                radius: Tokens.rounding.full
+                color: Colours.palette.m3primaryContainer
+
+                scale: playMouse.pressed ? 0.92 : (playMouse.containsMouse ? 1.05 : 1.0)
+                Behavior on scale {
+                    Anim {
+                        type: Anim.FastSpatial
+                    }
+                }
+
+                MaterialIcon {
+                    anchors.centerIn: parent
+                    text: root.player?.isPlaying ? "pause" : "play_arrow"
+                    color: Colours.palette.m3onPrimaryContainer
+                    fill: 1
+                    fontStyle: Tokens.font.icon.builders.medium.scale(1.2 * root.s).build()
+                }
+
+                MouseArea {
+                    id: playMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    enabled: root.player?.canTogglePlaying ?? false
+                    onClicked: root.player?.togglePlaying()
+                }
             }
 
             ControlIcon {
-                icon: "fast_forward"
+                icon: "skip_next"
                 enabled: root.player?.canGoNext ?? false
                 onClicked: root.player?.next()
             }
@@ -202,8 +199,8 @@ Item {
 
         text: icon
         fill: 1
-        color: "white"
-        opacity: enabled ? (mouse.pressed ? 0.5 : 1) : 0.35
+        color: Colours.palette.m3onSurface
+        opacity: enabled ? (mouse.pressed ? 0.5 : (mouse.containsMouse ? 0.8 : 1)) : 0.38
         fontStyle: Tokens.font.icon.builders.large.scale(size * root.s).build()
 
         MouseArea {
@@ -211,6 +208,7 @@ Item {
 
             anchors.fill: parent
             anchors.margins: -8
+            hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onClicked: ctrl.clicked()
         }

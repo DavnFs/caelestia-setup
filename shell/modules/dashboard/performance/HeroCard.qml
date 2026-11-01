@@ -18,7 +18,7 @@ StyledRect {
     required property real usage
     required property real temperature
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.palette.m3surfaceContainer
     radius: Tokens.rounding.extraLarge
 
     implicitWidth: Tokens.sizes.dashboard.perfHeroCardWidth

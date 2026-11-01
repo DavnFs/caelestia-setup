@@ -10,7 +10,7 @@ import qs.services
 StyledRect {
     id: root
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.palette.m3surfaceContainer
     radius: Tokens.rounding.extraLarge
 
     implicitWidth: Tokens.sizes.dashboard.perfNetworkCardWidth

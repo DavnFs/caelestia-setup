@@ -20,6 +20,12 @@ QtObject {
             description: Tr.tr("Background, live wallpaper, widgets"),
             category: "appearance"
         },
+        {
+            label: Tr.tr("Login screen"),
+            icon: "login",
+            description: Tr.tr("Background, live wallpaper, greeter"),
+            category: "appearance"
+        },
 
         // Connectivity
         // TODO

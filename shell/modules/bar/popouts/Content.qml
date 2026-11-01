@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import "./kblayout"
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Services.SystemTray
 import Caelestia.Config
@@ -22,6 +23,24 @@ Item {
 
     implicitWidth: currentPopout ? currentPopout.implicitWidth + Tokens.padding.large * 2 : 0
     implicitHeight: currentPopout ? currentPopout.implicitHeight + Tokens.padding.large * 2 : 0
+
+    StyledRect {
+        id: bg
+
+        anchors.fill: parent
+        radius: 15
+        color: Colours.palette.m3surfaceContainer
+        border.color: Colours.palette.m3outlineVariant
+        border.width: 1
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            blurMax: 20
+            shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.5)
+            shadowVerticalOffset: 3
+        }
+    }
 
     Item {
         id: content

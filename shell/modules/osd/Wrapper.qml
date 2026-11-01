@@ -9,11 +9,13 @@ import qs.services
 Item {
     id: root
 
+    property var bar: null
     required property ShellScreen screen
     required property ScreenState screenState
     required property bool sidebarOrSessionVisible
 
-    readonly property real slideOffset: (-implicitWidth - 5 - sidebarOffset) * offsetScale
+    readonly property int floatMargin: bar?.isFloating ? 10 : 0
+    readonly property real slideOffset: (implicitWidth + floatMargin + 15 + sidebarOffset) * offsetScale
 
     property bool hovered
     readonly property Brightness.Monitor monitor: Brightness.getMonitorForScreen(root.screen)
@@ -44,6 +46,7 @@ Item {
 
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
+    scale: 1 - 0.04 * offsetScale
     opacity: 1 - offsetScale
 
     Behavior on offsetScale {

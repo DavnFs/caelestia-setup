@@ -12,6 +12,7 @@ import qs.utils
 Item {
     id: root
 
+    property var bar: null
     required property ScreenState screenState
     readonly property FileDialog facePicker: FileDialog {
         title: Tr.tr("Select a profile picture")
@@ -31,10 +32,15 @@ Item {
     readonly property bool shouldBeActive: screenState.dashboard && Config.dashboard.enabled
     property real offsetScale: shouldBeActive ? 0 : 1
 
+    readonly property int openMargin: bar?.isFloating ? (bar.floatMarginV + 10) : 0
+
     visible: offsetScale < 1
-    anchors.topMargin: (-implicitHeight - 5) * offsetScale
+    anchors.topMargin: openMargin + (-implicitHeight - openMargin - 15) * offsetScale
+    width: implicitWidth
+    height: implicitHeight
     implicitHeight: content.implicitHeight
-    implicitWidth: content.implicitWidth || 854 // Hard coded fallback for first open
+    implicitWidth: content.implicitWidth || 884 // Hard coded fallback for first open
+    scale: 1 - 0.04 * offsetScale
     opacity: 1 - offsetScale
 
     Behavior on offsetScale {
@@ -46,6 +52,8 @@ Item {
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
+        width: item?.implicitWidth ?? implicitWidth
+        height: item?.implicitHeight ?? implicitHeight
 
         active: root.shouldBeActive || root.visible
 

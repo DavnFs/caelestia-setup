@@ -41,8 +41,9 @@ StyledRect {
         return false;
     }
 
-    color: Colours.tPalette.m3surfaceContainer
-    radius: Tokens.rounding.full
+    color: "transparent"
+    radius: Tokens.rounding.medium
+    border.width: 0
 
     clip: true
     implicitWidth: isHorizontal ? (iconLayout.implicitWidth + Tokens.padding.medium * 2) : Tokens.sizes.bar.innerWidth

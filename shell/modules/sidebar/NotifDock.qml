@@ -25,7 +25,7 @@ Item {
 
     Component.onCompleted: Notifs.list.forEach(n => n.popup = false)
 
-    Item {
+    RowLayout {
         id: title
 
         anchors.top: parent.top
@@ -33,44 +33,50 @@ Item {
         anchors.right: parent.right
         anchors.margins: Tokens.padding.extraSmall
 
-        implicitHeight: Math.max(count.implicitHeight, titleText.implicitHeight)
+        spacing: Tokens.spacing.small
 
-        StyledText {
-            id: count
+        RowLayout {
+            spacing: Tokens.spacing.small
+            Layout.alignment: Qt.AlignVCenter
 
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.leftMargin: root.notifCount > 0 ? 0 : -width - titleText.anchors.leftMargin
-            opacity: root.notifCount > 0 ? 1 : 0
-
-            text: root.notifCount
-            color: Colours.palette.m3outline
-            font: Tokens.font.label.large
-
-            Behavior on anchors.leftMargin {
-                Anim {}
+            StyledText {
+                text: Tr.tr("Notifications")
+                color: Colours.palette.m3onSurface
+                font: Tokens.font.title.small
             }
 
-            Behavior on opacity {
-                Anim {
-                    type: Anim.DefaultEffects
+            StyledRect {
+                visible: root.notifCount > 0
+                radius: Tokens.rounding.full
+                color: Colours.palette.m3primaryContainer
+                implicitWidth: Math.max(badgeText.implicitWidth + Tokens.padding.small * 1.5, implicitHeight)
+                implicitHeight: badgeText.implicitHeight + Tokens.padding.extraSmall
+
+                StyledText {
+                    id: badgeText
+                    anchors.centerIn: parent
+                    text: root.notifCount
+                    color: Colours.palette.m3onPrimaryContainer
+                    font: Tokens.font.label.small
                 }
             }
         }
 
-        StyledText {
-            id: titleText
+        Item {
+            Layout.fillWidth: true
+        }
 
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: count.right
-            anchors.right: parent.right
-            anchors.leftMargin: Tokens.spacing.extraSmall
-
-            // TRANSLATORS: the count itself is rendered separately, immediately to the left
-            text: root.notifCount > 0 ? Tr.trCtxN("notification", "notifications", root.notifCount, "notification count label, number shown separately") : Tr.tr("Notifications")
-            color: Colours.palette.m3outline
-            font: Tokens.font.label.large
-            elide: Text.ElideRight
+        IconTextButton {
+            id: clearBtn
+            visible: root.notifCount > 0
+            icon: "clear_all"
+            text: Tr.tr("Clear all")
+            type: ButtonBase.Tonal
+            horizontalPadding: Tokens.padding.small
+            verticalPadding: Tokens.padding.extraSmall
+            radius: Tokens.rounding.full
+            font: Tokens.font.label.medium
+            onClicked: clearTimer.start()
         }
     }
 
@@ -172,41 +178,5 @@ Item {
         }
     }
 
-    Loader {
-        asynchronous: true
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.margins: Tokens.padding.medium
 
-        scale: root.notifCount > 0 ? 1 : 0.5
-        opacity: root.notifCount > 0 ? 1 : 0
-        active: opacity > 0
-
-        sourceComponent: IconButton {
-            id: clearBtn
-
-            icon: "clear_all"
-            font: Tokens.font.icon.large
-            onClicked: clearTimer.start()
-
-            Elevation {
-                anchors.fill: parent
-                radius: parent.radius
-                z: -1
-                level: clearBtn.stateLayer.containsMouse ? 4 : 3
-            }
-        }
-
-        Behavior on scale {
-            Anim {
-                type: Anim.FastSpatial
-            }
-        }
-
-        Behavior on opacity {
-            Anim {
-                type: Anim.DefaultEffects
-            }
-        }
-    }
 }

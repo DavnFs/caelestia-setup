@@ -9,16 +9,57 @@ import "singletons"
 Rectangle {
     id: root
 
-    // shortcut: 12-hour clock is fixed here because SDDM can't read the shell's setting; flip if you switch to 24-hour
-    readonly property bool twelveHour: true
+    // Settings loaded dynamically from /var/tmp/caelestia-sddm/login.json
+    property bool twelveHour: false
+    property bool showPowerButtons: true
+    property string customBgImage: ""
+    property bool videoActive: false
     property string buffer: ""
     property bool authenticating: false
     property string error: ""
     property var now: new Date()
+    property color clockPrimary: Theme.mPrimary
+    property color clockSecondary: Theme.mSecondary
+    property color clockTertiary: Theme.mTertiary
     readonly property bool capsLock: (typeof keyboard !== "undefined") ? keyboard.capsLock : false
+
+    Component.onCompleted: {
+        const req = new XMLHttpRequest();
+        req.open("GET", "file:///var/tmp/caelestia-sddm/login.json");
+        req.onreadystatechange = function() {
+            if (req.readyState === XMLHttpRequest.DONE && req.status === 200) {
+                try {
+                    const cfg = JSON.parse(req.responseText);
+                    if (cfg.twelveHour !== undefined) root.twelveHour = cfg.twelveHour;
+                    if (cfg.showPowerButtons !== undefined) root.showPowerButtons = cfg.showPowerButtons;
+                    if (cfg.background === "video") {
+                        root.videoActive = true;
+                    } else {
+                        root.customBgImage = "file:///var/tmp/caelestia-sddm/background";
+                    }
+                    if (cfg.colours) {
+                        const isLight = !!cfg.colours.light;
+                        root.clockPrimary = (isLight && cfg.colours.primaryFixed) ? cfg.colours.primaryFixed : (cfg.colours.primary || Theme.mPrimary);
+                        root.clockSecondary = (isLight && cfg.colours.secondaryFixed) ? cfg.colours.secondaryFixed : (cfg.colours.secondary || Theme.mSecondary);
+                        root.clockTertiary = (isLight && cfg.colours.tertiaryFixed) ? cfg.colours.tertiaryFixed : (cfg.colours.tertiary || Theme.mTertiary);
+                        if (cfg.colours.primary) Theme.mPrimary = cfg.colours.primary;
+                        if (cfg.colours.secondary) Theme.mSecondary = cfg.colours.secondary;
+                        if (cfg.colours.tertiary) Theme.mTertiary = cfg.colours.tertiary;
+                        if (cfg.colours.onSurface) Theme.mOnSurface = cfg.colours.onSurface;
+                        if (cfg.colours.surface) Theme.mSurface = cfg.colours.surface;
+                        if (cfg.colours.surfaceContainer) Theme.mSurfaceContainer = cfg.colours.surfaceContainer;
+                        if (cfg.colours.outline) Theme.mOutline = cfg.colours.outline;
+                    }
+                } catch (e) {}
+            }
+        };
+        req.send();
+    }
     readonly property string userName: {
-        if (userModel.count > 0 && userModel.lastIndex >= 0)
-            return userModel.data(userModel.index(userModel.lastIndex, 0), Qt.UserRole + 1);
+        if (userModel.count > 0) {
+            const idx = (userModel.lastIndex >= 0 && userModel.lastIndex < userModel.count) ? userModel.lastIndex : 0;
+            return userModel.data(userModel.index(idx, 0), Qt.UserRole + 1);
+        }
         return "";
     }
 
@@ -27,12 +68,14 @@ Rectangle {
             return;
         error = "";
         authenticating = true;
-        sddm.login(userName, buffer, sessionModel.lastIndex);
+        const sIdx = (sessionModel.lastIndex >= 0 && sessionModel.lastIndex < sessionModel.count) ? sessionModel.lastIndex : 0;
+        sddm.login(userName, buffer, sIdx);
         buffer = "";
     }
 
     width: 1920
     height: 1080
+    readonly property real s: Math.max(0.6, root.height / 1080)
     color: "black"
 
     // Same font as the Caelestia shell; loaded from the theme because the greeter can't read ~/.local/share/fonts
@@ -109,12 +152,13 @@ Rectangle {
 
             AnimatedImage {
                 anchors.fill: parent
-                source: Theme.backgroundSource
+                source: root.customBgImage || Theme.backgroundSource
                 fillMode: Image.PreserveAspectCrop
             }
 
             Loader {
                 anchors.fill: parent
+                active: root.videoActive
                 source: "components/VideoBackground.qml"
             }
         }
@@ -141,21 +185,89 @@ Rectangle {
     Column {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.topMargin: 90 * root.height / 1080
-        spacing: -10
+        anchors.topMargin: 80 * root.s
+        spacing: 8 * root.s
 
-        GlassText {
+        Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: Qt.formatDate(root.now, "ddd d MMM")
-            font.pixelSize: 30 * root.height / 1080
+            text: Qt.formatDate(root.now, "ddd, d MMM")
+            color: root.clockTertiary
+            font.family: root.fontFamily
+            font.pixelSize: 22 * root.s
+            font.weight: Font.DemiBold
+            font.variableAxes: ({ "wght": 600 })
+
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                blurMax: 16
+                shadowColor: Qt.rgba(0, 0, 0, 0.5)
+                shadowVerticalOffset: 2
+            }
         }
 
-        GlassText {
+        Row {
             anchors.horizontalCenter: parent.horizontalCenter
-            // Qt only gives 12-hour "h" with an AM/PM marker; drop the marker like macOS does
-            text: root.twelveHour ? Qt.formatTime(root.now, "h:mm AP").split(" ")[0] : Qt.formatTime(root.now, "HH:mm")
-            font.pixelSize: 150 * root.height / 1080
+            spacing: 2 * root.s
+
+            Text {
+                text: root.twelveHour ? Qt.formatTime(root.now, "h") : Qt.formatTime(root.now, "HH")
+                color: root.clockPrimary
+                font.family: root.fontFamily
+                font.pixelSize: 108 * root.s
+                font.weight: Font.Medium
+                font.variableAxes: ({ "wght": 500 })
+
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    shadowEnabled: true
+                    blurMax: 20
+                    shadowColor: Qt.rgba(0, 0, 0, 0.5)
+                    shadowVerticalOffset: 3
+                }
+            }
+
+            Text {
+                text: ":"
+                color: Theme.withAlpha(Theme.mOutline, 0.75)
+                font.family: root.fontFamily
+                font.pixelSize: 108 * root.s
+                font.weight: Font.Medium
+                font.variableAxes: ({ "wght": 500 })
+                topPadding: -4 * root.s
+
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    shadowEnabled: true
+                    blurMax: 20
+                    shadowColor: Qt.rgba(0, 0, 0, 0.5)
+                    shadowVerticalOffset: 3
+                }
+            }
+
+            Text {
+                text: Qt.formatTime(root.now, "mm")
+                color: root.clockSecondary
+                font.family: root.fontFamily
+                font.pixelSize: 108 * root.s
+                font.weight: Font.Medium
+                font.variableAxes: ({ "wght": 500 })
+
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    shadowEnabled: true
+                    blurMax: 20
+                    shadowColor: Qt.rgba(0, 0, 0, 0.5)
+                    shadowVerticalOffset: 3
+                }
+            }
         }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        z: -1
+        onClicked: keyHandler.forceActiveFocus()
     }
 
     Item {
@@ -165,39 +277,39 @@ Rectangle {
         width: 300
         height: 44 + 32
 
-        Text {
-            anchors.centerIn: field
-            text: root.authenticating ? "Logging in…" : "Enter Password"
-            color: Qt.rgba(1, 1, 1, 0.75)
-            font.family: root.fontFamily
-            font.pixelSize: 16
-            font.weight: Font.Medium
-            opacity: root.buffer ? 0 : 1
-
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 200
-                }
-            }
-        }
-
         Rectangle {
             id: field
 
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width
-            height: 44
-            radius: height / 2
-            color: Qt.rgba(1, 1, 1, 0.18)
+            height: 48
+            radius: 16
+            color: Theme.mSurfaceContainer
             border.width: 1
-            border.color: Qt.rgba(1, 1, 1, 0.28)
-            opacity: root.buffer ? 1 : 0
+            border.color: Theme.withAlpha(Theme.mOutline, 0.5)
 
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 200
-                }
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                blurMax: 16
+                shadowColor: Qt.rgba(0, 0, 0, 0.35)
+                shadowVerticalOffset: 3
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: keyHandler.forceActiveFocus()
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: root.authenticating ? "Logging in…" : "Enter Password"
+                color: Theme.mOnSurfaceVariant
+                font.family: root.fontFamily
+                font.pixelSize: 16
+                font.weight: Font.Medium
+                visible: !root.buffer
             }
 
             Text {
@@ -206,8 +318,9 @@ Rectangle {
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideLeft
                 text: "•".repeat(root.buffer.length)
-                color: "white"
+                color: Theme.mOnSurface
                 font.pixelSize: 20
+                visible: !!root.buffer
             }
         }
 
@@ -225,92 +338,26 @@ Rectangle {
     Row {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.margins: 24
+        anchors.margins: 16
         spacing: 8
+        visible: root.showPowerButtons
 
         PowerButton {
-            width: 48
-            height: 48
+            width: 44
+            height: 44
             iconText: "restart_alt"
             onRestoreFocus: () => keyHandler.forceActiveFocus()
             onClickedAction: () => sddm.reboot()
         }
 
         PowerButton {
-            width: 48
-            height: 48
+            width: 44
+            height: 44
             iconText: "power_settings_new"
             onRestoreFocus: () => keyHandler.forceActiveFocus()
             onClickedAction: () => sddm.powerOff()
         }
     }
 
-    // Frosted-glass text: blurred background behind the letters, lightly tinted (same recipe as the lock screen)
-    component GlassText: Item {
-        id: glassText
 
-        property alias text: shape.text
-        property alias font: shape.font
-
-        implicitWidth: shape.implicitWidth
-        implicitHeight: shape.implicitHeight
-
-        Text {
-            id: shape
-
-            anchors.fill: parent
-            color: "white"
-            font.family: root.fontFamily
-            font.weight: Font.DemiBold
-            // Google Sans Flex is a variable font; Qt only applies the weight through its axis
-            font.variableAxes: ({ "wght": 600 })
-            visible: false
-            layer.enabled: true
-        }
-
-        Item {
-            id: fill
-
-            anchors.fill: parent
-            visible: false
-            layer.enabled: true
-
-            ShaderEffectSource {
-                id: behind
-
-                anchors.fill: parent
-                sourceItem: background
-                sourceRect: {
-                    glassText.x; glassText.y; glassText.width; glassText.height; // Re-map on layout
-                    const p = glassText.mapToItem(background, 0, 0);
-                    return Qt.rect(p.x, p.y, glassText.width, glassText.height);
-                }
-                visible: false
-            }
-
-            MultiEffect {
-                anchors.fill: parent
-                source: behind
-                blurEnabled: true
-                blurMax: 48
-                blur: 1
-                saturation: 0.2
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                color: "white"
-                opacity: 0.55
-            }
-        }
-
-        MultiEffect {
-            anchors.fill: parent
-            source: fill
-            maskEnabled: true
-            maskSource: shape
-            maskThresholdMin: 0.3
-            maskSpreadAtMin: 0.3
-        }
-    }
 }

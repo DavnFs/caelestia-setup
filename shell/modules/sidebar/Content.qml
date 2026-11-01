@@ -1,5 +1,8 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -10,33 +13,31 @@ Item {
     required property Props props
     required property ScreenState screenState
 
-    ColumnLayout {
-        id: layout
+    StyledRect {
+        id: bg
 
         anchors.fill: parent
-        spacing: Tokens.spacing.medium
+        radius: Tokens.rounding.large
+        color: Colours.palette.m3surfaceContainerLow
+        border.color: Colours.palette.m3outlineVariant
+        border.width: 1
 
-        StyledRect {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-
-            radius: Tokens.rounding.large
-            color: Colours.tPalette.m3surfaceContainerLow
-
-            NotifDock {
-                objectName: "sidebarNotifications"
-
-                props: root.props
-                screenState: root.screenState
-            }
+        layer.enabled: true
+        layer.smooth: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            blurMax: 12
+            shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.5)
+            shadowVerticalOffset: 3
         }
+    }
 
-        StyledRect {
-            Layout.topMargin: Tokens.padding.large - layout.spacing
-            Layout.fillWidth: true
-            implicitHeight: 1
+    NotifDock {
+        id: notifDock
+        objectName: "sidebarNotifications"
 
-            color: Colours.tPalette.m3outlineVariant
-        }
+        anchors.fill: parent
+        props: root.props
+        screenState: root.screenState
     }
 }
