@@ -1,16 +1,16 @@
 {
     "theme": {
         "colorScheme": "~/.config/qtengine/caelestia.colors",
-        "iconTheme": "Papirus-Light",
+        "iconTheme": "Papirus-Dark",
         "style": "Darkly",
         "font": {
             "family": "Google Sans Flex",
-            "size": 11,
+            "size": 12,
             "weight": 400
         },
         "fontFixed": {
             "family": "Google Sans Mono",
-            "size": 11,
+            "size": 12,
             "weight": 400
         }
     },

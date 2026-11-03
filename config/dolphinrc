@@ -1,10 +1,10 @@
 [CompactMode]
-IconSize=22
-PreviewSize=22
+IconSize=24
+PreviewSize=24
 
 [DetailsMode]
-IconSize=22
-PreviewSize=22
+IconSize=32
+PreviewSize=32
 
 [General]
 AutoExpandFolders=false
@@ -23,9 +23,9 @@ Version=202
 ViewPropsTimestamp=2026,10,6,20,56,56.157
 
 [IconsMode]
-IconSize=72
+IconSize=96
 MaximumTextLines=2
-PreviewSize=112
+PreviewSize=128
 TextWidthIndex=2
 UseSystemFont=true
 

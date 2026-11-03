@@ -138,10 +138,10 @@ colorschemehash = 0efb452114ece4d3338057cb89f434aff85d80d0
 xftantialias = true
 xfthintstyle = hintslight
 xftsubpixel = none
-font = Google Sans Flex,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
-menufont = Google Sans Flex,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
-smallestreadablefont = Google Sans Flex,9,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
-toolbarfont = Google Sans Flex,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
+font = Google Sans Flex,12,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
+menufont = Google Sans Flex,12,-1,5,500,0,0,0,0,0,0,0,0,0,0,1,,0,0
+smallestreadablefont = Google Sans Flex,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
+toolbarfont = Google Sans Flex,12,-1,5,500,0,0,0,0,0,0,0,0,0,0,1,,0,0
 name = Caelestia
 shadesortcolumn = true
 

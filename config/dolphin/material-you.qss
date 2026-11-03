@@ -1,45 +1,49 @@
 /* ===================================================================
- * Material You 3 (M3) Stylesheet for KDE Dolphin File Manager
- * Strictly following Google Material 3 Guidelines:
- * - Bubble shape geometry (Pill / 20-24px radii)
- * - Tonal surface hierarchy (Surface, Surface Container Low/High)
- * - Zero wireframe box outlines
- * - Typography: Google Sans Flex
+ * Material You 3 (M3) Official Specifications for KDE Dolphin
+ * Reference: https://m3.material.io/
+ * - Type Scale: Google Sans Flex (11.5pt Body, 500 Medium)
+ * - Navigation Drawer: 48dp item height, 24dp pill indicator
+ * - Top App Bar: 64dp surface, 40dp circular icon buttons
+ * - Search Bar Pill: 44dp height, 24dp bubble radius
+ * - Item Cards: 16dp rounded bubbles, no wireframe lines
+ * - Tonal Hierarchy: Surface (#141317) -> Container (#1c1b1f / #211f26)
  * =================================================================== */
 
-/* Universal Reset & Typography */
+/* Universal Reset & M3 Typography */
 * {
     font-family: "Google Sans Flex", "Google Sans", sans-serif;
-    font-size: 11pt;
+    font-size: 11.5pt;
+    font-weight: 400;
     outline: none;
     text-decoration: none;
     -qt-style-features: background-color;
 }
 
-/* Base Window Surfaces */
+/* Base Window Surface (M3 Surface) */
 QMainWindow,
 DolphinMainWindow {
     background-color: #141317;
     border: none;
 }
 
-/* ToolBar / Top App Bar */
+/* Top App Bar (64dp M3 App Bar) */
 QToolBar {
     background-color: #141317;
     border: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    spacing: 8px;
-    padding: 8px 14px;
+    spacing: 10px;
+    padding: 10px 18px;
+    min-height: 52px;
 }
 
-/* Action Icon Buttons (M3 Circular Icon Buttons) */
+/* Action Icon Buttons (40dp M3 Circular Targets) */
 QToolBar QToolButton {
     background-color: transparent;
     color: #e5e1e7;
     border: none;
-    border-radius: 18px;
-    min-width: 36px;
-    min-height: 36px;
+    border-radius: 20px;
+    min-width: 40px;
+    min-height: 40px;
     padding: 4px;
     margin: 1px;
     font-weight: 500;
@@ -56,15 +60,15 @@ QToolBar QToolButton:checked {
     color: #c6bfff;
 }
 
-/* Breadcrumb & Path Navigator (M3 Search Pill Shape) */
+/* Search Bar & Breadcrumb Navigator (M3 Search Pill Shape) */
 KUrlNavigator,
 #urlNavigator {
-    background-color: #201f24;
+    background-color: #211f26;
     border: none;
-    border-radius: 20px;
-    padding: 3px 12px;
-    margin: 2px 6px;
-    min-height: 36px;
+    border-radius: 24px;
+    padding: 4px 16px;
+    margin: 2px 8px;
+    min-height: 44px;
 }
 
 KUrlNavigator QToolButton,
@@ -72,9 +76,10 @@ KUrlNavigator QToolButton,
     background-color: transparent;
     color: #e5e1e7;
     border: none;
-    border-radius: 12px;
-    padding: 4px 10px;
+    border-radius: 14px;
+    padding: 6px 12px;
     font-weight: 500;
+    font-size: 11pt;
 }
 
 KUrlNavigator QToolButton:hover,
@@ -89,7 +94,7 @@ KUrlNavigator QToolButton:pressed,
     color: #c6bfff;
 }
 
-/* Navigation Drawer / Places Panel */
+/* M3 Navigation Drawer (Sidebar / Places Dock) */
 QDockWidget {
     border: none;
     background-color: #1c1b1f;
@@ -97,12 +102,12 @@ QDockWidget {
 
 QDockWidget::title {
     background-color: #1c1b1f;
-    padding: 10px 18px;
+    padding: 14px 22px 6px 22px;
     color: #928f9a;
     font-size: 9.5pt;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
     border: none;
 }
 
@@ -114,15 +119,16 @@ QTreeView {
     show-decoration-selected: 1;
 }
 
-/* Navigation Drawer Items: Pill Shape */
+/* Navigation Drawer Items: 48dp M3 Pill Shape */
 QTreeView::item {
-    min-height: 40px;
-    height: 40px;
-    border-radius: 20px;
-    margin: 2px 8px;
-    padding-left: 14px;
-    padding-right: 14px;
+    min-height: 46px;
+    height: 46px;
+    border-radius: 23px;
+    margin: 3px 12px;
+    padding-left: 16px;
+    padding-right: 16px;
     color: #cac4d0;
+    font-size: 11.5pt;
     font-weight: 500;
     border: none;
     text-decoration: none;
@@ -134,7 +140,7 @@ QTreeView::item:hover {
     text-decoration: none;
 }
 
-/* Active Navigation Pill (M3 Secondary Container) */
+/* Active Navigation Pill (M3 Secondary Container Active Indicator) */
 QTreeView::item:selected {
     background-color: #474355;
     color: #e8def8;
@@ -154,6 +160,29 @@ DolphinView,
 QAbstractItemView {
     background-color: #141317;
     border: none;
+    padding: 12px;
+    outline: none;
+}
+
+/* M3 Item Bubble Cards in Content View */
+QAbstractItemView::item {
+    border: none;
+    outline: none;
+    border-radius: 16px;
+    padding: 8px;
+    color: #e5e1e7;
+}
+
+QAbstractItemView::item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+}
+
+QAbstractItemView::item:selected {
+    background-color: rgba(198, 191, 255, 0.22);
+    color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid rgba(198, 191, 255, 0.4);
 }
 
 /* M3 Tab Bar (Secondary Tabs) */
@@ -164,12 +193,13 @@ QTabBar {
 }
 
 QTabBar::tab {
-    background-color: #201f24;
+    background-color: #211f26;
     color: #cac4d0;
-    border-radius: 16px;
-    padding: 6px 18px;
+    border-radius: 18px;
+    padding: 8px 20px;
     margin: 4px;
     font-weight: 500;
+    font-size: 11pt;
     border: none;
 }
 
@@ -184,18 +214,18 @@ QTabBar::tab:hover:!selected {
     color: #e5e1e7;
 }
 
-/* M3 Floating Scrollbars (Thin capsule, zero track border) */
+/* Floating M3 Scrollbars (Thin Pill, No Track Wireframes) */
 QScrollBar:vertical {
     border: none;
     background: transparent;
-    width: 6px;
+    width: 8px;
     margin: 4px 2px;
 }
 
 QScrollBar::handle:vertical {
     background: #49454f;
-    border-radius: 3px;
-    min-height: 28px;
+    border-radius: 4px;
+    min-height: 32px;
 }
 
 QScrollBar::handle:vertical:hover {
@@ -214,14 +244,14 @@ QScrollBar::sub-page:vertical {
 QScrollBar:horizontal {
     border: none;
     background: transparent;
-    height: 6px;
+    height: 8px;
     margin: 2px 4px;
 }
 
 QScrollBar::handle:horizontal {
     background: #49454f;
-    border-radius: 3px;
-    min-width: 28px;
+    border-radius: 4px;
+    min-width: 32px;
 }
 
 QScrollBar::handle:horizontal:hover {
@@ -237,24 +267,24 @@ QScrollBar::sub-page:horizontal {
     width: 0px;
 }
 
-/* Splitters: Zero thickness */
+/* Splitter: Borderless Connection */
 QSplitter::handle {
     background: transparent;
     width: 2px;
 }
 
-/* Context Menus: Elevated M3 Popups */
+/* Elevated M3 Context Menus */
 QMenu {
     background-color: #211f26;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
-    padding: 6px;
+    padding: 8px;
 }
 
 QMenu::item {
     background-color: transparent;
     color: #e5e1e7;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 8px 16px;
     margin: 2px 4px;
 }
@@ -270,13 +300,14 @@ QMenu::separator {
     margin: 4px 8px;
 }
 
-/* Inputs & Filter / Search Bar */
+/* Inputs & Filter Search */
 QLineEdit {
-    background-color: #201f24;
+    background-color: #211f26;
     color: #e5e1e7;
-    border-radius: 18px;
-    padding: 6px 14px;
+    border-radius: 20px;
+    padding: 8px 16px;
     border: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 11pt;
 }
 
 QLineEdit:focus {
