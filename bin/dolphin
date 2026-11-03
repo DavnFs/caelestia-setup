@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exec /usr/bin/dolphin -stylesheet /home/davin/.config/dolphin/material-you.qss "$@"

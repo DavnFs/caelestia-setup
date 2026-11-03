@@ -14,7 +14,7 @@ EnlargeSmallPreviews=true
 GlobalViewProps=true
 RenameInline=true
 ShowPasteBarAfterCopying=true
-ShowSelectionToggle=true
+ShowSelectionToggle=false
 ShowStatusBar=Disabled
 ShowToolTips=false
 ShowZoomSlider=false
@@ -23,21 +23,21 @@ Version=202
 ViewPropsTimestamp=2026,10,6,20,56,56.157
 
 [IconsMode]
-IconSize=64
+IconSize=72
 MaximumTextLines=2
-PreviewSize=96
-TextWidthIndex=1
+PreviewSize=112
+TextWidthIndex=2
 UseSystemFont=true
 
 [KFileDialog Settings]
 Places Icons Auto-resize=false
-Places Icons Static Size=22
+Places Icons Static Size=24
 
 [MainWindow]
 MenuBar=Disabled
 
 [PlacesPanel]
-IconSize=22
+IconSize=24
 
 [Search]
 Location=Everywhere
