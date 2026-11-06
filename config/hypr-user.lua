@@ -22,9 +22,3 @@ hl.animation({ leaf = "workspaces", enabled = true, speed = 4.5, bezier = "smoot
 hl.animation({ leaf = "layersIn", enabled = true, speed = 4.5, bezier = "smoothDecel", style = "slide" })
 hl.animation({ leaf = "layersOut", enabled = true, speed = 3, bezier = "emphasizedAccel", style = "slide" })
 
--- Auto-maximize application windows on launch (monocle mode)
-hl.window_rule({
-    name             = "auto-maximize",
-    match            = { float = false },
-    fullscreen_state = "1 0",
-})
