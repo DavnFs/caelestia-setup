@@ -12,7 +12,7 @@ Rectangle {
     // Settings loaded dynamically from /var/tmp/caelestia-sddm/login.json
     property bool twelveHour: false
     property bool showPowerButtons: true
-    property string customBgImage: ""
+    property string customBgImage: "file:///var/tmp/caelestia-sddm/background"
     property bool videoActive: false
     property string buffer: ""
     property bool authenticating: false
